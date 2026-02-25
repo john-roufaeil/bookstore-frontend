@@ -1,0 +1,10 @@
+<div class="card h-100 shadow-sm border-0 bg-light">
+  <div class="card-body text-center">
+    <h6 class="card-title mb-2">
+      <a [routerLink]="['/authors', author._id]" class="stretched-link text-decoration-none text-brown fw-bold">
+        {{ author.name }}
+      </a>
+    </h6>
+    <p class="card-text small text-muted" *ngIf="author.bio">{{ author.bio }}</p>
+  </div>
+</div>

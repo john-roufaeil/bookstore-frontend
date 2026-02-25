@@ -1,4 +1,3 @@
-
 <section class="bg-book-hero text-white text-center py-5 border-bottom border-warning border-3 shadow">
     <div class="container py-4">
         <p class="text-gold text-uppercase small fw-bold mb-3" style="letter-spacing: 0.15em;">
@@ -49,22 +48,33 @@
     </div>
     }
 
-   
+
     <h5 class="text-uppercase text-brown fw-bold small border-bottom pb-2 mb-4" style="letter-spacing: 0.1em;">
         <i class="bi bi-pen text-gold"></i> Popular Authors
     </h5>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3">
-        @for (author of popularAuthors(); track author.name) {
+    @if (loading()) {
+    <div class="text-center py-5">
+        <div class="spinner-border text-brown" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+    } @else {
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
+        @for (author of popularAuthors().slice(0, 4); track author._id) {
         <div class="col">
-            <div class="card text-center p-4 h-100 shadow-sm border-0 rounded-3 bg-white book-card-premium">
-                <div class="bg-book-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
-                    style="width: 56px; height: 56px; font-size: 1.5rem;">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <h6 class="fw-bold mb-1 text-brown">{{ author.name }}</h6>
-                <p class="text-muted small mb-0">{{ author.bio }}</p>
-            </div>
+            <app-author-card [author]="author"></app-author-card>
+        </div>
+        } @empty {
+        <div class="col-12 text-center py-5 text-muted bg-white rounded-4 shadow-sm">
+            <i class="bi bi-person display-1 d-block mb-3 text-gold opacity-25"></i>
+            <p>No authors available yet.</p>
         </div>
         }
     </div>
+    <div class="text-center mb-5">
+        <a routerLink="/authors" class="btn btn-book-outline rounded-pill px-4 shadow-sm">
+            View All Authors <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    }
 </section>

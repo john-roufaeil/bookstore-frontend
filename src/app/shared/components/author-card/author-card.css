@@ -1,0 +1,13 @@
+.card-title a {
+  color: #7c4f1d;
+  transition: color 0.2s;
+}
+
+.card-title a:hover {
+  color: #b8860b;
+  text-decoration: underline;
+}
+
+.card {
+  min-height: 120px;
+}
