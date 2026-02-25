@@ -135,14 +135,6 @@ body {
   opacity: 1 !important;
 }
 
-.x-small {
-  font-size: 0.6rem !important;
-}
-
-.xx-small {
-  font-size: 0.5rem !important;
-}
-
 .main-content {
   min-height: calc(100vh - 60px);
 }
@@ -159,7 +151,6 @@ body {
   background-color: var(--book-primary) !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
-
 .logo-accent {
   color: var(--book-accent);
 }
@@ -169,22 +160,18 @@ body {
 .navbar-book .nav-link:focus {
   background: rgba(255, 255, 255, 0.08);
 }
-
 .navbar-book .navbar-collapse {
   padding-bottom: 0;
 }
-
 @media (max-width: 991.98px) {
   .navbar-book .navbar-collapse {
     padding: 12px 0;
   }
-
   .navbar-book .nav-link {
     padding: 10px 16px !important;
     border-radius: 8px;
     font-size: 14px;
   }
-
   .navbar-book .btn {
     padding: 8px 16px;
   }

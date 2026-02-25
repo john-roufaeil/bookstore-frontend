@@ -4,7 +4,8 @@ import { NotFound } from './not-found/not-found';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./features/books/home/home').then(m => m.Home)
+    redirectTo: 'books',
+    pathMatch: 'full',
   },
   {
     path: 'auth',
@@ -21,16 +22,7 @@ export const routes: Routes = [
   },
   {
     path: 'books',
-    children: [
-      {
-        path: '',
-        loadComponent: () => import('./features/books/book-list/book-list').then(m => m.BookList)
-      },
-      {
-        path: ':id',
-        loadComponent: () => import('./features/books/book-detail/book-detail').then(m => m.BookDetail)
-      }
-    ]
+    loadComponent: () => import('./features/books/book-list/book-list').then((c) => c.BookList),
   },
   {
     path: 'authors',
