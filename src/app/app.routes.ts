@@ -21,7 +21,16 @@ export const routes: Routes = [
   },
   {
     path: 'books',
-    loadChildren: () => import('./features/books/books.routes').then(m => m.BOOKS_ROUTES)
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/books/book-list/book-list').then(m => m.BookList)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/books/book-detail/book-detail').then(m => m.BookDetail)
+      }
+    ]
   },
   {
     path: 'authors',
