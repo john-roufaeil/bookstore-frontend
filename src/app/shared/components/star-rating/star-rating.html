@@ -1,0 +1,8 @@
+<div class="d-inline-flex gap-1 align-items-center" (mouseleave)="onStarLeave()">
+    @for (star of stars; track star) {
+    <i [class]="getStarClass(star)" [class.text-warning]="star <= (hoveredStar() || rating())"
+        [class.text-secondary]="star > (hoveredStar() || rating())"
+        [class.opacity-25]="star > (hoveredStar() || rating())" [style.cursor]="readonly() ? 'default' : 'pointer'"
+        [style.fontSize.px]="14" (mouseenter)="onStarHover(star)" (click)="onStarClick(star)"></i>
+    }
+</div>
