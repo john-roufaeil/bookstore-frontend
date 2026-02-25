@@ -1,0 +1,96 @@
+<div class="container py-4 animate-fade-in">
+
+    <div class="mb-5">
+        <h1 class="font-serif fw-black text-brown display-5 mb-1">Our Books</h1>
+        <p class="text-muted small text-uppercase tracking-widest fw-bold opacity-75" style="font-size: 0.65rem;">
+            Explore thousands of titles across every genre</p>
+    </div>
+
+    <div class="row g-4 pt-2">
+        <aside class="col-lg-3 d-none d-lg-block">
+            <div class="sticky-top" style="top: 80px;">
+                <div class="card border-0 rounded-4 p-4 shadow-sm bg-white mb-4">
+                    <h5 class="fw-black text-brown mb-4 small text-uppercase tracking-widest border-bottom pb-3">Filters
+                    </h5>
+
+                    <app-book-filters [categories]="categories()" [authors]="authors()"
+                        (filterChange)="onFilterChange($event)" (clear)="onClearFilters()">
+                    </app-book-filters>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-link btn-sm text-muted text-decoration-none fw-bold x-small"
+                            (click)="onClearFilters()">
+                            RESET ALL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="col-12 col-lg-9">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <button
+                        class="btn btn-outline-dark rounded-pill px-4 py-2 d-flex align-items-center gap-2 hover-lift shadow-sm fw-bold x-small d-lg-none"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#filterSidebar">
+                        <i class="bi bi-filter-left fs-5"></i> FILTERS
+                    </button>
+                    <div class="vr opacity-25 d-none d-sm-block align-self-center mx-1" style="height: 1.2rem;"></div>
+                    <span class="text-muted xx-small fw-bold tracking-widest text-uppercase align-self-center py-1">
+                        Showing {{ books().length }} {{ books().length === 1 ? 'Volume' : 'Volumes' }}
+                    </span>
+                </div>
+            </div>
+
+            @if (loading()) {
+            <div class="text-center py-5">
+                <div class="spinner-border text-warning" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            } @else {
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-3 g-3 mb-5">
+                @for (book of books(); track book._id) {
+                <div class="col">
+                    <app-book-card [book]="book" (addToCart)="onAddToCart($event)"></app-book-card>
+                </div>
+                } @empty {
+                <div class="col-12">
+                    <app-empty-state title="No volumes found" message="Try adjusting filters" buttonText="RESET FILTERS"
+                        (action)="onClearFilters()">
+                    </app-empty-state>
+                </div>
+                }
+            </div>
+
+            <app-pagination [currentPage]="currentPage()" [totalPages]="totalPages()"
+                (pageChange)="onPageChange($event)">
+            </app-pagination>
+            }
+        </div>
+    </div>
+
+    <div class="offcanvas offcanvas-start border-0 shadow-lg rounded-end-4 d-lg-none" tabindex="-1" id="filterSidebar"
+        style="width: 320px; background: #fdfaf5;">
+        <div class="offcanvas-header border-bottom px-4 py-3">
+            <h5 class="offcanvas-title fw-black text-brown small text-uppercase tracking-widest">Filters</h5>
+            <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-4">
+            <app-book-filters [categories]="categories()" [authors]="authors()" (filterChange)="onFilterChange($event)"
+                (clear)="onClearFilters()">
+            </app-book-filters>
+
+            <div class="d-grid gap-2 mt-5">
+                <button class="btn btn-warning btn-sm rounded-pill py-2 fw-black shadow-sm hover-lift x-small"
+                    data-bs-dismiss="offcanvas">
+                    VIEW RESULTS
+                </button>
+                <button class="btn btn-link btn-sm text-muted text-decoration-none fw-bold x-small"
+                    (click)="onClearFilters()">
+                    RESET ALL
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

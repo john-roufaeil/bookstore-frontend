@@ -1,0 +1,32 @@
+@if (totalPages() > 1) {
+<nav class="d-flex justify-content-center">
+    <ul class="pagination pagination-sm gap-2">
+        <li class="page-item" [class.disabled]="currentPage() === 1">
+            <button
+                class="page-link rounded-pill border-0 shadow-sm d-flex align-items-center justify-content-center bg-white hover-lift"
+                style="width: 34px; height: 34px;" (click)="onPageChange(currentPage() - 1)">
+                <i class="bi bi-chevron-left" style="font-size: 0.7rem;"></i>
+            </button>
+        </li>
+
+        @for (page of pages(); track page) {
+        <li class="page-item" [class.active]="page === currentPage()">
+            <button
+                class="page-link rounded-pill border-0 shadow-sm d-flex align-items-center justify-content-center mx-1 fw-black small"
+                [class.bg-warning]="page === currentPage()" [class.text-dark]="page === currentPage()"
+                style="width: 34px; height: 34px; font-size: 0.75rem;" (click)="onPageChange(page)">
+                {{ page }}
+            </button>
+        </li>
+        }
+
+        <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+            <button
+                class="page-link rounded-pill border-0 shadow-sm d-flex align-items-center justify-content-center bg-white hover-lift"
+                style="width: 34px; height: 34px;" (click)="onPageChange(currentPage() + 1)">
+                <i class="bi bi-chevron-right" style="font-size: 0.7rem;"></i>
+            </button>
+        </li>
+    </ul>
+</nav>
+}
