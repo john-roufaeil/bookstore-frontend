@@ -1,0 +1,11 @@
+<div class="text-center py-5 text-muted bg-white border-0 shadow-sm rounded-4">
+    <i [class]="icon() + ' display-4 d-block mb-3 text-warning opacity-25'"></i>
+    <h5 class="fw-black text-dark">{{ title() }}</h5>
+    <p class="small fw-bold text-uppercase tracking-wider">{{ message() }}</p>
+    @if (buttonText()) {
+    <button class="btn btn-warning btn-sm rounded-pill mt-2 px-3 fw-black x-small shadow-sm hover-scale"
+        (click)="action.emit()">
+        {{ buttonText() }}
+    </button>
+    }
+</div>
