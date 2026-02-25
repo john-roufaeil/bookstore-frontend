@@ -10,6 +10,15 @@ export const routes: Routes = [
         loadChildren: () => import('./features/books/books.routes').then(m => m.BOOKS_ROUTES)
     },
     {
+        path: 'categories',
+        redirectTo: 'books',
+        pathMatch: 'full'
+    },
+    {
+        path: 'authors',
+        loadChildren: () => import('./features/authors/authors.routes').then(m => m.AUTHORS_ROUTES)
+    },
+    {
         path: 'cart',
         loadChildren: () => import('./features/cart/cart.routes').then(m => m.CART_ROUTES)
     },
@@ -23,7 +32,6 @@ export const routes: Routes = [
     },
     {
         path: '',
-        redirectTo: 'books',
-        pathMatch: 'full'
+        loadComponent: () => import('./features/books/home/home').then(m => m.Home)
     }
 ];
