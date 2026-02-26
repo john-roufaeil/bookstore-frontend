@@ -1,0 +1,15 @@
+.author-list-section {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}
+
+.author-empty-state {
+  border: 2px dashed #b8860b;
+  background: #fffbe6;
+  border-radius: 1rem;
+  padding: 2rem 0;
+}

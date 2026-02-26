@@ -1,1 +1,60 @@
-<p>author-list works!</p>
+<section class="container author-list-section">
+
+  <div class="mb-5">
+    <h1 class="font-serif fw-black text-brown display-5 mb-1">Our Authors</h1>
+    <p class="text-muted small text-uppercase tracking-widest fw-bold opacity-75" style="font-size: 0.65rem;">
+      Meet the writers behind the books
+    </p>
+  </div>
+
+  <div class="row g-3 align-items-center mb-4">
+    <div class="col-12 col-md-8 col-lg-6">
+      <label for="authorSearch" class="form-label small text-uppercase tracking-widest fw-bold text-muted mb-2">
+        Search Authors
+      </label>
+      <div class="input-group">
+        <span class="input-group-text bg-white border-book text-muted">
+          <i class="bi bi-search" aria-hidden="true"></i>
+        </span>
+        <input
+          id="authorSearch"
+          type="search"
+          class="form-control border-book"
+          placeholder="Type a name…"
+          autocomplete="off"
+          name="authorSearch"
+          [(ngModel)]="search"
+        />
+        @if (search) {
+        <button type="button" class="btn btn-book-outline" (click)="search = ''">
+          Clear
+        </button>
+        }
+      </div>
+    </div>
+    <div class="col-12 col-md-auto ms-md-auto text-muted small">
+      Showing {{ filteredAuthors.length }} of {{ authors().length }}
+    </div>
+  </div>
+
+  @if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-brown" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  } @else {
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+	    @for (author of filteredAuthors; track author._id) {
+	    <div class="col d-flex">
+	      <app-author-card class="flex-fill" [author]="author"></app-author-card>
+	    </div>
+	    } @empty {
+    <div class="col-12 text-center text-muted author-empty-state border-dashed">
+      <i class="bi bi-person display-1 d-block mb-3 text-gold opacity-25"></i>
+      <p>No authors found.</p>
+    </div>
+    }
+  </div>
+  }
+</section>
