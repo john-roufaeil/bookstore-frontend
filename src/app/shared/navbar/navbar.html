@@ -74,15 +74,30 @@
           </a>
         }
         <hr class="d-lg-none border-light my-1 opacity-25" />
-        <button class="btn btn-outline-light btn-sm font-mono mt-1 mt-lg-0" (click)="onLogout()">
+        <button class="btn btn-outline-light btn-sm font-mono mt-1 mt-lg-0" (click)="logout()">
           <i class="fa-solid fa-right-from-bracket me-2 d-lg-none"></i>Logout
         </button>
       } @else {
-        <a class="btn btn-outline-light btn-sm w-100 w-lg-auto fw-bold" routerLink="/auth/login">Sign In</a>
+        <a class="btn btn-outline-light btn-sm w-100 w-lg-auto fw-bold" routerLink="/auth/login"
+          >Sign In</a
+        >
         <a class="btn btn-book-accent btn-sm fw-bold w-100 w-lg-auto" routerLink="/auth/register"
           >Register</a
         >
       }
     </div>
+
+    <!-- Dark Mode Toggle -->
+    <button
+      class="theme-toggle ms-2"
+      (click)="toggleDark()"
+      [attr.title]="isDark() ? 'Switch to light mode' : 'Switch to dark mode'"
+    >
+      @if (isDark()) {
+        <i class="fa-solid fa-sun"></i>
+      } @else {
+        <i class="fa-solid fa-moon"></i>
+      }
+    </button>
   </div>
 </nav>

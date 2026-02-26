@@ -63,12 +63,28 @@
         }
       </div>
 
+      <!-- Server Error Display -->
+      @if (serverError()) {
+        <div
+          class="alert alert-danger d-flex align-items-center font-mono small mt-3 mb-0 rounded-3"
+          role="alert"
+        >
+          <i class="fa-solid fa-circle-exclamation me-2"></i>
+          {{ serverError() }}
+        </div>
+      }
+
       <button
         class="btn btn-book-accent btn-login-submit w-100 fw-bold font-mono py-3 mt-4 rounded-3 shadow-sm text-uppercase d-flex align-items-center justify-content-center"
         type="submit"
-        [disabled]="loginForm.invalid"
+        [disabled]="loginForm.invalid || isLoading()"
       >
-        <i class="fa-solid fa-right-to-bracket me-2"></i> Sign In
+        @if (isLoading()) {
+          <i class="fa-solid fa-spinner fa-spin me-2"></i>
+        } @else {
+          <i class="fa-solid fa-right-to-bracket me-2"></i>
+          Sign In
+        }
       </button>
     </form>
 
