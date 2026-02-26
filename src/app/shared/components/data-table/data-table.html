@@ -1,0 +1,16 @@
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+  <div class="table-responsive">
+    <ng-content></ng-content>
+  </div>
+</div>
+
+@if (totalPages() > 1) {
+  <div class="mt-4">
+    <app-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      (pageChange)="pageChange.emit($event)"
+    ></app-pagination>
+  </div>
+}
+
