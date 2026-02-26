@@ -1,0 +1,281 @@
+<section class="container">
+  <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-4">
+    <div>
+      <h1 class="font-serif fw-black text-brown mb-1">Books</h1>
+      <p class="text-muted small mb-0">Create, edit, and delete books.</p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+      <div class="input-group input-group-sm admin-search">
+        <span class="input-group-text bg-white border-book text-muted">
+          <i class="bi bi-search" aria-hidden="true"></i>
+        </span>
+        <input
+          type="search"
+          class="form-control border-book"
+          placeholder="Search books…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+        @if (search()) {
+        <button type="button" class="btn btn-book-outline" (click)="clearSearch()">Clear</button>
+        }
+      </div>
+
+      <select
+        class="form-select form-select-sm border-book"
+        style="width: 180px;"
+        [ngModel]="authorFilter()"
+        (ngModelChange)="authorFilter.set($event); onFilterChange()"
+      >
+        <option value="">All authors</option>
+        @for (author of authors(); track author._id) {
+        <option [value]="author._id">{{ author.name }}</option>
+        }
+      </select>
+
+      <select
+        class="form-select form-select-sm border-book"
+        style="width: 180px;"
+        [ngModel]="categoryFilter()"
+        (ngModelChange)="categoryFilter.set($event); onFilterChange()"
+      >
+        <option value="">All categories</option>
+        @for (category of categories(); track category._id) {
+        <option [value]="category._id">{{ category.name }}</option>
+        }
+      </select>
+
+      <select
+        class="form-select form-select-sm border-book"
+        style="width: 170px;"
+        [ngModel]="sort()"
+        (ngModelChange)="sort.set($event); onFilterChange()"
+      >
+        <option value="">Sort…</option>
+        <option value="price:asc">Price: low → high</option>
+        <option value="price:desc">Price: high → low</option>
+        <option value="stock:asc">Stock: low → high</option>
+        <option value="stock:desc">Stock: high → low</option>
+      </select>
+
+      <button type="button" class="btn btn-book-primary btn-sm" (click)="openCreate()">
+        <i class="bi bi-plus-lg me-1"></i> Create
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+  <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  }
+
+  <app-data-table
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    (pageChange)="onPageChange($event)"
+  >
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 70px;">Cover</th>
+          <th>Name</th>
+          <th style="width: 110px;">Price</th>
+          <th style="width: 110px;">Stock</th>
+          <th style="width: 200px;">Author</th>
+          <th style="width: 200px;">Category</th>
+          <th style="width: 160px;" class="text-end">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @if (loading() && !books().length) {
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <div class="spinner-border text-brown" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+        } @else {
+          @if (loading()) {
+          <tr>
+            <td colspan="7" class="py-2 small text-muted">
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              Updating…
+            </td>
+          </tr>
+          }
+          @for (book of books(); track trackById($index, book)) {
+          <tr>
+            <td>
+              <div class="ratio ratio-1x1 rounded-3 overflow-hidden border-book bg-white" style="width: 44px;">
+                <img
+                  [src]="book.coverImage || 'https://res.cloudinary.com/demo/image/upload/v1652966567/sample.jpg'"
+                  alt=""
+                  class="w-100 h-100 object-fit-cover"
+                  loading="lazy"
+                />
+              </div>
+            </td>
+            <td class="fw-semibold text-brown">{{ book.name }}</td>
+            <td>${{ book.price }}</td>
+            <td>{{ book.stock }}</td>
+            <td>{{ displayAuthor(book) }}</td>
+            <td>{{ displayCategory(book) }}</td>
+            <td class="text-end">
+              <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-book-outline" (click)="openEdit(book)">
+                  Edit
+                </button>
+                <button type="button" class="btn btn-outline-danger" (click)="openDelete(book)">
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              <i class="bi bi-journal-x display-6 d-block mb-2 opacity-25"></i>
+              No books found.
+            </td>
+          </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </app-data-table>
+</section>
+
+@if (isFormModalOpen()) {
+<div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true" (click)="closeModal()">
+  <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-brown">
+          {{ modal() === 'edit' ? 'Edit Book' : 'Create Book' }}
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
+      </div>
+
+      <form [formGroup]="bookForm" (ngSubmit)="saveBook()">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12 col-lg-8">
+              <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Name</label>
+              <input class="form-control border-book" formControlName="name" />
+              @if (bookForm.controls.name.touched && bookForm.controls.name.invalid) {
+              <div class="text-danger small mt-1">Name is required.</div>
+              }
+            </div>
+
+            <div class="col-6 col-lg-2">
+              <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Price</label>
+              <input class="form-control border-book" type="number" formControlName="price" />
+            </div>
+
+            <div class="col-6 col-lg-2">
+              <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Stock</label>
+              <input class="form-control border-book" type="number" formControlName="stock" />
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Author</label>
+              <select class="form-select border-book" formControlName="author">
+                <option value="">Select author…</option>
+                @for (author of authors(); track author._id) {
+                <option [value]="author._id">{{ author.name }}</option>
+                }
+              </select>
+              @if (bookForm.controls.author.touched && bookForm.controls.author.invalid) {
+              <div class="text-danger small mt-1">Author is required.</div>
+              }
+            </div>
+
+            <div class="col-12 col-lg-6">
+              <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Category</label>
+              <select class="form-select border-book" formControlName="category">
+                <option value="">None</option>
+                @for (category of categories(); track category._id) {
+                <option [value]="category._id">{{ category.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Cover image</label>
+              <div class="d-flex flex-column flex-lg-row gap-3 align-items-start">
+                <div class="ratio ratio-1x1 rounded-4 overflow-hidden border-book bg-white" style="width: 120px;">
+                  @if (coverPreviewUrl()) {
+                    <img
+                      [src]="coverPreviewUrl()!"
+                      alt="Cover preview"
+                      class="w-100 h-100 object-fit-cover"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted small">
+                      No cover
+                    </div>
+                  }
+                </div>
+
+                <div class="flex-grow-1">
+                  <input
+                    type="file"
+                    class="form-control border-book"
+                    accept="image/*"
+                    (change)="onCoverFileChange($event)"
+                  />
+                  <div class="form-text">
+                    Choose an image file. It uploads to Cloudinary on save and the returned URL is stored with the book.
+                  </div>
+                  <input type="hidden" formControlName="coverImage" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-book-outline" [disabled]="saving()" (click)="closeModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-book-primary" [disabled]="saving()">
+            @if (saving()) { Saving… } @else { Save }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" (click)="closeModal()"></div>
+}
+
+@if (modal() === 'delete') {
+<div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true" (click)="closeModal()">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-brown">Delete book</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeModal()"></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="mb-2">Are you sure you want to delete this book?</p>
+        <div class="fw-semibold text-brown">{{ selectedBook()?.name }}</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-book-outline" [disabled]="saving()" (click)="closeModal()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" [disabled]="saving()" (click)="confirmDelete()">
+          @if (saving()) { Deleting… } @else { Delete }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" (click)="closeModal()"></div>
+}
