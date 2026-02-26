@@ -1,0 +1,57 @@
+<header class="sticky-top bg-white border-bottom">
+  <nav class="navbar navbar-expand px-3 px-lg-4 py-2">
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-brown" routerLink="/admin/books">
+      <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-book-primary text-white"
+        style="width: 32px; height: 32px;">
+        <i class="bi bi-book"></i>
+      </span>
+      <span class="font-serif">BookStore</span>
+      <span class="text-muted fw-semibold small ms-1">Admin</span>
+    </a>
+
+    <div class="ms-auto">
+      <button type="button" class="btn btn-sm btn-book-outline" (click)="onSignOut()">
+        Sign out
+      </button>
+    </div>
+  </nav>
+</header>
+
+<div class="admin-shell">
+  <aside class="admin-sidebar border-end bg-white">
+    <div class="px-3 py-3">
+      <div class="text-uppercase small text-muted fw-bold tracking-widest mb-2">Manage</div>
+      <nav class="nav nav-pills flex-column gap-1">
+        <a class="nav-link admin-nav-link" routerLink="/admin/books" routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+          <i class="bi bi-book me-2" aria-hidden="true"></i>
+          Books
+        </a>
+        <a class="nav-link admin-nav-link" routerLink="/admin/authors" routerLinkActive="active">
+          <i class="bi bi-pen me-2" aria-hidden="true"></i>
+          Authors
+        </a>
+        <a class="nav-link admin-nav-link" routerLink="/admin/categories" routerLinkActive="active">
+          <i class="bi bi-tags me-2" aria-hidden="true"></i>
+          Categories
+        </a>
+        <a class="nav-link admin-nav-link" routerLink="/admin/orders" routerLinkActive="active">
+          <i class="bi bi-bag-check me-2" aria-hidden="true"></i>
+          Orders
+        </a>
+        <a class="nav-link admin-nav-link" routerLink="/admin/reviews" routerLinkActive="active">
+          <i class="bi bi-chat-left-text me-2" aria-hidden="true"></i>
+          Reviews
+        </a>
+        <a class="nav-link admin-nav-link" routerLink="/admin/users" routerLinkActive="active">
+          <i class="bi bi-people me-2" aria-hidden="true"></i>
+          Users
+        </a>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="admin-main py-4">
+    <router-outlet></router-outlet>
+  </main>
+</div>
