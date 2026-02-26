@@ -71,7 +71,7 @@
 
                 <h1 class="h2 fw-black text-dark mb-1 font-serif">{{ book().name }}</h1>
                 <p class="fs-6 text-muted mb-3 opacity-75">
-                    By <a href="#"
+                    By <a [routerLink]="['/authors', book().author?._id]"
                         class="text-dark fw-bold text-decoration-none border-bottom border-warning border-1">{{
                         book().author?.name }}</a>
                 </p>
