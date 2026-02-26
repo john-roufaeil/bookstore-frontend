@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { Author } from '../models/author.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class AuthorService {
     page?: number;
     limit?: number;
     search?: string;
-  }): Observable<any[]> {
+  }): Observable<Author[]> {
     let httpParams = new HttpParams();
     if (params) {
       if (params.page) httpParams = httpParams.set('page', params.page.toString());
@@ -24,13 +25,13 @@ export class AuthorService {
       if (params.search) httpParams = httpParams.set('search', params.search);
     }
     return this.http.get<any>(this.apiUrl, { params: httpParams }).pipe(
-      map(res => res.data)
+      map(res => res.data.authors as Author[])
     );
   }
 
-  getAuthor(id: string): Observable<any> {
+  getAuthor(id: string): Observable<Author> {
     return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      map(res => res.data)
+      map(res => res.data as Author)
     );
   }
 }

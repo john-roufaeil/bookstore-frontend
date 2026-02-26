@@ -42,7 +42,7 @@ export class Home implements OnInit {
 
     this.authorService.getAuthors({ limit: 4 }).subscribe({
       next: (data) => {
-        this.popularAuthors.set((data as any[] || []));
+        this.popularAuthors.set(data.authors || []);
         this.loading.set(false);
       },
       error: () => {

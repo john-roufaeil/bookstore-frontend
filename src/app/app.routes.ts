@@ -34,8 +34,17 @@ export const routes: Routes = [
   },
   {
     path: 'authors',
-    loadComponent: () =>
-      import('./features/authors/author-list/author-list').then((c) => c.AuthorList),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/authors/author-list/author-list').then((c) => c.AuthorList)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/authors/author-detail/author-detail').then((c) => c.AuthorDetail)
+      }
+    ]
   },
   {
     path: 'cart',

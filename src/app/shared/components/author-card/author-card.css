@@ -1,13 +1,51 @@
-.card-title a {
-  color: #7c4f1d;
-  transition: color 0.2s;
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  height: 100%;
 }
 
-.card-title a:hover {
-  color: #b8860b;
-  text-decoration: underline;
-}
-
-.card {
+.author-card {
+  flex: 1 1 auto;
+  width: 100%;
   min-height: 120px;
+  background: var(--book-surface);
+  color: inherit;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.author-card:hover {
+  border-color: var(--book-accent);
+  box-shadow: 0 0.75rem 1.5rem rgba(26, 18, 11, 0.12);
+  transform: translateY(-2px);
+}
+
+.author-card:focus-visible {
+  outline: 3px solid rgba(212, 168, 83, 0.45);
+  outline-offset: 2px;
+}
+
+.author-avatar {
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+  background: var(--book-secondary);
+  color: var(--book-surface);
+}
+
+.author-meta {
+  min-width: 0;
+}
+
+.author-bio {
+  line-height: 1.7;
+}
+
+.author-cta {
+  color: var(--book-primary);
+}
+
+.author-card:hover .author-cta i {
+  transform: translateX(2px);
 }

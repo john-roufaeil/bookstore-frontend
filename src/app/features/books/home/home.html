@@ -61,7 +61,7 @@
     } @else {
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
         @for (author of popularAuthors().slice(0, 4); track author._id) {
-        <div class="col">
+        <div class="col d-flex">
             <app-author-card [author]="author"></app-author-card>
         </div>
         } @empty {
