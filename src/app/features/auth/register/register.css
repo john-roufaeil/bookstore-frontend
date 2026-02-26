@@ -1,0 +1,40 @@
+.btn-register-submit {
+  letter-spacing: 1px; 
+  transition: all 0.3s ease;
+  background-color: var(--book-accent) !important;
+  color: var(--book-primary) !important;
+  border: 1px solid var(--book-accent) !important;
+}
+
+.btn-register-submit:hover:not(:disabled) {
+  background-color: #c29742 !important; /* Slightly darker gold to match navbar hover */
+  border-color: #c29742 !important;
+  color: var(--book-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 168, 83, 0.4) !important;
+}
+
+.btn-register-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background-color: var(--book-accent) !important;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--book-muted);
+  z-index: 10;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: var(--book-primary);
+}
