@@ -6,7 +6,7 @@ export interface Review {
   user: User;
   book:Book;
   rating:number;
-  comment:string;
+  comment?:string;
   createdAt:Date;
   updatedAt:Date;
 }
