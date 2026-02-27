@@ -4,6 +4,7 @@ import { NotFound } from './not-found/not-found';
 export const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     loadComponent: () => import('./features/books/home/home').then(m => m.Home)
   },
   {

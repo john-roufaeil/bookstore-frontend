@@ -1,4 +1,4 @@
-.placeholder {
-  min-height: 180px;
+:host {
+  display: block;
 }
 

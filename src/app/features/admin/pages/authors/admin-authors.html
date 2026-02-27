@@ -1,15 +1,60 @@
 <section class="container">
-  <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-4">
-    <div>
-      <h1 class="font-serif fw-black text-brown mb-1">Authors</h1>
-      <p class="text-muted small mb-0">Manage book authors.</p>
-    </div>
-  </div>
+  <app-admin-toolbar title="Authors" subtitle="Manage authors." [search]="search"
+    searchPlaceholder="Search authors by name…" (searchChange)="onSearchChange($event)" (refresh)="fetchAuthors()">
+    <button type="button" class="btn btn-book-primary btn-sm" (click)="openCreate()">
+      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+      Create
+    </button>
 
-  <div class="card border-0 shadow-sm rounded-4">
-    <div class="card-body p-4 text-muted">
-      Authors admin page coming next.
-    </div>
-  </div>
+    <select class="form-select form-select-sm border-book" style="width: 190px;" [ngModel]="sort"
+      (ngModelChange)="onSortChange($event)">
+      <option value="">Sort…</option>
+      <option value="bookCount:desc">Books: high to low</option>
+      <option value="bookCount:asc">Books: low to high</option>
+      <option value="createdAt:desc">Newest</option>
+      <option value="createdAt:asc">Oldest</option>
+    </select>
+  </app-admin-toolbar>
+
+  @if (errorMessage()) {
+  <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  }
+
+  <app-admin-table [columns]="columns" [rows]="pagedAuthors" [loading]="loading()" emptyIcon="bi bi-person-x"
+    emptyText="No authors found." [currentPage]="page" [totalPages]="totalPages" (pageChange)="onPageChange($event)">
+    <ng-template let-author>
+      <tr>
+        <td class="fw-semibold text-brown">{{ author.name }}</td>
+        <td>{{ author.bookCount ?? '—' }}</td>
+        <td class="text-muted">{{ author.createdAt ? (author.createdAt | date:'medium') : '—' }}</td>
+        <td class="text-end">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-book-outline" (click)="openEdit(author)">Edit</button>
+            <button type="button" class="btn btn-outline-danger" (click)="openDelete(author)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </app-admin-table>
 </section>
 
+<app-admin-form-modal [open]="formOpen()" [title]="editingId() ? 'Edit Author' : 'Create Author'" submitText="Save"
+  [submitDisabled]="!draft().name.trim()" (submitted)="saveDraft()" (closed)="closeForm()">
+  <div class="row g-3">
+    <div class="col-12 col-lg-6">
+      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Name</label>
+      <input class="form-control border-book" [ngModel]="draft().name"
+        (ngModelChange)="draft.set({ ...draft(), name: $event })" name="authorName" />
+    </div>
+    <div class="col-12">
+      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Bio</label>
+      <textarea class="form-control border-book" rows="4" [ngModel]="draft().bio"
+        (ngModelChange)="draft.set({ ...draft(), bio: $event })" name="authorBio"></textarea>
+    </div>
+  </div>
+</app-admin-form-modal>
+
+<app-admin-confirm-modal [open]="deleteOpen()" title="Delete author"
+  [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'" confirmText="Delete" (confirmed)="confirmDelete()"
+  (closed)="closeDelete()">
+</app-admin-confirm-modal>
