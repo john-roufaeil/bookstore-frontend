@@ -155,6 +155,87 @@
             </div>
           </div>
         </div>
+
+        <section class="mt-5">
+          <div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-3">
+            <div>
+              <h2 class="h5 fw-black mb-1">Reviews</h2>
+              <div class="text-muted small">
+                @if (reviews().length) {
+                  {{ averageRating() }} / 5 • {{ reviews().length }} reviews
+                } @else {
+                  No reviews yet.
+                }
+              </div>
+            </div>
+          </div>
+
+          @if (showReviewForm()) {
+            <div class="card border-0 shadow-sm rounded-4 mb-3">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                  <div class="fw-bold text-brown">Your review</div>
+                  @if (myOrdersLoading()) {
+                    <div class="text-muted small">Checking eligibility…</div>
+                  }
+                </div>
+
+                @if (reviewErrorMessage()) {
+                  <div class="alert alert-danger border-0 shadow-sm mb-3">{{ reviewErrorMessage() }}</div>
+                }
+
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <app-star-rating
+                    [rating]="draftRating()"
+                    [readonly]="!canSubmitReview() || reviewSaving()"
+                    (ratingChange)="onDraftRatingChange($event)"
+                  ></app-star-rating>
+                  <span class="text-muted small">
+                    {{ draftRating() ? (draftRating() + '/5') : 'Select rating' }}
+                  </span>
+                </div>
+
+                <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">
+                  Comment (optional)
+                </label>
+                <textarea
+                  class="form-control border-book"
+                  rows="3"
+                  [disabled]="!canSubmitReview() || reviewSaving()"
+                  [ngModel]="draftComment()"
+                  (ngModelChange)="draftComment.set($event)"
+                ></textarea>
+
+                <div class="d-flex gap-2 mt-3">
+                  <button
+                    type="button"
+                    class="btn btn-book-primary"
+                    [disabled]="reviewSaving() || draftRating() < 1"
+                    (click)="saveMyReview()"
+                  >
+                    {{ myReview() ? 'Update' : 'Submit' }}
+                  </button>
+                  @if (myReview()) {
+                    <button
+                      type="button"
+                      class="btn btn-book-outline"
+                      [disabled]="reviewSaving()"
+                      (click)="deleteMyReview()"
+                    >
+                      Delete
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <app-book-reviews
+            [reviews]="reviews()"
+            [loading]="reviewsLoading()"
+            [error]="reviewsErrorMessage()"
+          ></app-book-reviews>
+        </section>
       </div>
     </div>
   </div>
