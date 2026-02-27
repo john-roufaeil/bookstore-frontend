@@ -49,11 +49,11 @@ export class Register implements OnInit {
   formInit() {
     this.registerForm = new FormGroup({
       email: new FormControl(null, [Validators.required, Validators.email]),
-      password: new FormControl(null, [Validators.required, Validators.pattern('^[a-zA-Z0-9]{8,50}$')]),
+      password: new FormControl(null, [Validators.required, Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,50}/)]),
       reconfirmPassword: new FormControl(null, [Validators.required]),
       firstName: new FormControl(null, [Validators.required, Validators.minLength(2), Validators.maxLength(25), Validators.pattern('^[a-zA-Z]{2,25}$')]),
       lastName: new FormControl(null, [Validators.required, Validators.minLength(2), Validators.maxLength(25), Validators.pattern('^[a-zA-Z]{2,25}$')]),
-      dateOfBirth: new FormControl(null, [Validators.required]),
+      dob: new FormControl(null, [Validators.required]),
     }, { validators: matchValidator('password', 'reconfirmPassword') });
   }
 

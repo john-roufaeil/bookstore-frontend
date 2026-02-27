@@ -105,11 +105,11 @@
           min="1900-01-01"
           max="2011-12-31"
           id="dobInput"
-          formControlName="dateOfBirth"
+          formControlName="dob"
           placeholder="Date of Birth"
         />
         <label for="dobInput" class="text-muted font-mono">Date of Birth</label>
-        @if (registerForm.get('dateOfBirth')?.errors && registerForm.get('dateOfBirth')?.touched) {
+        @if (registerForm.get('dob')?.errors && registerForm.get('dob')?.touched) {
           <small class="text-danger font-mono mt-1 d-block">Date of birth is required</small>
         }
       </div>
@@ -142,7 +142,7 @@
             <small class="text-danger font-mono mt-1 d-block">Password is required</small>
           } @else if (registerForm.get('password')?.hasError('pattern')) {
             <small class="text-danger font-mono mt-1 d-block"
-              >Password must be 8-50 characters using only letters and numbers</small
+              >Password must be 8–50 chars with uppercase, lowercase, and a number</small
             >
           }
         }
