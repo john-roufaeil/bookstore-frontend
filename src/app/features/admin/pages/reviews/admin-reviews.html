@@ -41,15 +41,14 @@
           <app-star-rating [rating]="review.rating || 0" [readonly]="true"></app-star-rating>
           <span class="text-muted small ms-2">{{ review.rating }}/5</span>
         </td>
-        <td class="text-muted">{{ review.comment || '—' }}</td>
         <td class="fw-semibold text-brown">
           {{ `${review?.user?.firstName ?? ''} ${review?.user?.lastName ?? ''}`.trim() }}
         </td>
         <td class="text-muted">{{ review.createdAt ? (review.createdAt | date:'medium') : '—' }}</td>
         <td class="text-end">
           <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-book-outline" (click)="openView(review)">View</button>
-            <button type="button" class="btn btn-outline-danger" (click)="openDelete(review)">Delete</button>
+            <button type="button" class="btn btn-book-outline" [disabled]="saving()" (click)="openView(review)">View</button>
+            <button type="button" class="btn btn-outline-danger" [disabled]="saving()" (click)="openDelete(review)">Delete</button>
           </div>
         </td>
       </tr>
@@ -89,5 +88,12 @@
   </div>
 </app-admin-modal>
 
-<app-admin-confirm-modal [open]="deleteOpen()" title="Delete review" message="Delete this review?" confirmText="Delete"
-  (confirmed)="confirmDelete()" (closed)="closeDelete()"></app-admin-confirm-modal>
+<app-admin-confirm-modal
+  [open]="deleteOpen()"
+  title="Delete review"
+  message="Delete this review?"
+  [confirmText]="saving() ? 'Deleting...' : 'Delete'"
+  [confirmDisabled]="saving()"
+  (confirmed)="confirmDelete()"
+  (closed)="closeDelete()"
+></app-admin-confirm-modal>

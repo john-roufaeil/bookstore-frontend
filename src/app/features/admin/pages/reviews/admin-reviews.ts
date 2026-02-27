@@ -30,6 +30,7 @@ type SortType = 'createdAt:desc' | 'createdAt:asc' | 'rating:desc' | 'rating:asc
 })
 export class AdminReviews implements OnInit {
   loading = signal(true);
+  saving = signal(false);
   errorMessage = signal('');
 
   reviews = signal<Review[]>([]);
@@ -43,7 +44,6 @@ export class AdminReviews implements OnInit {
   columns: AdminTableColumn[] = [
     { label: 'Book', width: '240px' },
     { label: 'Rating', width: '140px' },
-    { label: 'Comment' },
     { label: 'User', width: '220px' },
     { label: 'Created', width: '190px' },
     { label: 'Actions', width: '170px', align: 'end' },
@@ -95,7 +95,7 @@ export class AdminReviews implements OnInit {
     this.selectedReview.set(null);
   }
 
-  openDelete(review: any): void {
+  openDelete(review: Review): void {
     this.selectedForDelete.set(review);
     this.deleteOpen.set(true);
   }
@@ -108,8 +108,25 @@ export class AdminReviews implements OnInit {
   confirmDelete(): void {
     const selected = this.selectedForDelete();
     if (!selected?._id) return;
-    this.reviews.set(this.reviews().filter((r) => r?._id !== selected._id));
-    this.closeDelete();
+
+    this.saving.set(true);
+    this.errorMessage.set('');
+
+    this.http
+      .delete<any>(`${environment.apiUrl}/reviews/${selected._id}`)
+      .pipe(
+        timeout(15000),
+        finalize(() => this.saving.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.closeDelete();
+          this.fetchReviews();
+        },
+        error: () => {
+          this.errorMessage.set('Failed to delete review.');
+        },
+      });
   }
 
   onFilterChange(): void {
