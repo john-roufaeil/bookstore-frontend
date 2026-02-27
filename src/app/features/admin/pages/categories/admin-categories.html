@@ -1,15 +1,79 @@
 <section class="container">
-  <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-4">
-    <div>
-      <h1 class="font-serif fw-black text-brown mb-1">Categories</h1>
-      <p class="text-muted small mb-0">Manage book categories.</p>
-    </div>
-  </div>
+  <app-admin-toolbar
+    title="Categories"
+    subtitle="Manage categories."
+    [search]="search"
+    searchPlaceholder="Search categories…"
+    (searchChange)="onSearchChange($event)"
+    (refresh)="fetchCategories()"
+  >
+    <button type="button" class="btn btn-book-primary btn-sm" (click)="openCreate()">
+      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+      Create
+    </button>
 
-  <div class="card border-0 shadow-sm rounded-4">
-    <div class="card-body p-4 text-muted">
-      Categories admin page coming next.
-    </div>
-  </div>
+    <select
+      class="form-select form-select-sm border-book"
+      style="width: 190px;"
+      [ngModel]="sort"
+      (ngModelChange)="onSortChange($event)"
+    >
+      <option value="">Sort…</option>
+      <option value="createdAt:desc">Newest</option>
+      <option value="createdAt:asc">Oldest</option>
+    </select>
+  </app-admin-toolbar>
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  }
+
+  <app-admin-table
+    [columns]="columns"
+    [rows]="pagedCategories"
+    [loading]="loading()"
+    emptyText="No categories found."
+    [currentPage]="page"
+    [totalPages]="totalPages"
+    (pageChange)="onPageChange($event)"
+  >
+    <ng-template let-category>
+      <tr>
+        <td class="fw-semibold text-brown">{{ category.name }}</td>
+        <td class="text-muted">{{ category.createdAt ? (category.createdAt | date:'medium') : '—' }}</td>
+        <td class="text-end">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-book-outline" (click)="openEdit(category)">Edit</button>
+            <button type="button" class="btn btn-outline-danger" (click)="openDelete(category)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </app-admin-table>
 </section>
 
+<app-admin-form-modal
+  [open]="formOpen()"
+  [title]="editingId() ? 'Edit Category' : 'Create Category'"
+  submitText="Save"
+  [submitDisabled]="!draftName().trim()"
+  (submitted)="saveDraft()"
+  (closed)="closeForm()"
+>
+  <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Name</label>
+  <input
+    class="form-control border-book"
+    [ngModel]="draftName()"
+    (ngModelChange)="draftName.set($event)"
+    name="categoryName"
+  />
+</app-admin-form-modal>
+
+<app-admin-confirm-modal
+  [open]="deleteOpen()"
+  title="Delete category"
+  [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'"
+  confirmText="Delete"
+  (confirmed)="confirmDelete()"
+  (closed)="closeDelete()"
+></app-admin-confirm-modal>
