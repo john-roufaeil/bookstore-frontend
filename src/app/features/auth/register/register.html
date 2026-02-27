@@ -1,221 +1,233 @@
-<div
-  class="d-flex align-items-center justify-content-center fade-in"
-  style="min-height: calc(100vh - 60px); background: var(--book-bg)"
->
+<div class="d-flex fade-in" style="min-height: calc(100vh - 60px)">
   <div
-    class="border-book rounded-4 p-4 p-md-5 shadow-sm bg-book-surface"
-    style="width: 100%; min-width: 600px; max-width: 60vw"
+    class="d-none d-lg-flex col-lg-4 align-items-center justify-content-center position-relative"
+    style="background: linear-gradient(135deg, #1a120b 0%, #3c2a21 100%)"
   >
-    <h3 class="font-serif fw-bold mb-1">Create account</h3>
-    <p class="text-muted font-mono small mb-4">Join thousands of book lovers today</p>
+    <img
+      src="/images/auth-reading.png"
+      alt="Reading illustration"
+      style="width: 85%; max-width: 380px; border-radius: 20px; opacity: 0.9"
+    />
+  </div>
 
-    <form [formGroup]="registerForm" (ngSubmit)="submitRegisterForm()">
-      <div class="row mb-3 g-3">
-        <div class="col-12 col-md-6">
-          <div class="form-floating">
-            <input
-              type="text"
-              class="form-control border-book"
-              id="firstNameInput"
-              placeholder="First Name"
-              formControlName="firstName"
-            />
-            <label for="firstNameInput" class="text-muted font-mono">First Name</label>
+  <div
+    class="col-12 col-lg-8 d-flex align-items-center justify-content-center p-4"
+    style="background: var(--book-bg)"
+  >
+    <div class="w-100" style="max-width: 600px">
+      <h3 class="font-serif fw-bold mb-1">Create account</h3>
+      <p class="text-muted font-mono small mb-4">Join thousands of book lovers today</p>
+
+      <form [formGroup]="registerForm" (ngSubmit)="submitRegisterForm()">
+        <div class="row mb-3 g-3">
+          <div class="col-12 col-md-6">
+            <div class="form-floating">
+              <input
+                type="text"
+                class="form-control border-book"
+                id="firstNameInput"
+                placeholder="First Name"
+                formControlName="firstName"
+              />
+              <label for="firstNameInput" class="text-muted font-mono">First Name</label>
+            </div>
+
+            @if (registerForm.get('firstName')?.errors && registerForm.get('firstName')?.touched) {
+              @if (registerForm.get('firstName')?.hasError('required')) {
+                <small class="text-danger font-mono mt-1 d-block">First name is required</small>
+              }
+              @if (registerForm.get('firstName')?.hasError('minlength')) {
+                <small class="text-danger font-mono mt-1 d-block"
+                  >First name must be at least 2 characters long</small
+                >
+              }
+              @if (registerForm.get('firstName')?.hasError('maxlength')) {
+                <small class="text-danger font-mono mt-1 d-block"
+                  >First name must be at most 25 characters long</small
+                >
+              }
+              @if (registerForm.get('firstName')?.hasError('pattern')) {
+                <small class="text-danger font-mono mt-1 d-block"
+                  >First name must contain only letters</small
+                >
+              }
+            }
           </div>
-
-          @if (registerForm.get('firstName')?.errors && registerForm.get('firstName')?.touched) {
-            @if (registerForm.get('firstName')?.hasError('required')) {
-              <small class="text-danger font-mono mt-1 d-block">First name is required</small>
+          <div class="col-12 col-md-6">
+            <div class="form-floating">
+              <input
+                type="text"
+                class="form-control border-book"
+                id="lastNameInput"
+                placeholder="Last Name"
+                formControlName="lastName"
+              />
+              <label for="lastNameInput" class="text-muted font-mono">Last Name</label>
+            </div>
+            @if (registerForm.get('lastName')?.errors && registerForm.get('lastName')?.touched) {
+              @if (registerForm.get('lastName')?.hasError('required')) {
+                <small class="text-danger font-mono mt-1 d-block">Last name is required</small>
+              }
+              @if (registerForm.get('lastName')?.hasError('minlength')) {
+                <small class="text-danger font-mono mt-1 d-block"
+                  >Last name must be at least 2 characters long</small
+                >
+              }
+              @if (registerForm.get('lastName')?.hasError('maxlength')) {
+                <small class="text-danger font-mono mt-1 d-block"
+                  >Last name must be at most 25 characters long</small
+                >
+              }
+              @if (registerForm.get('lastName')?.hasError('pattern')) {
+                <small class="text-danger font-mono mt-1 d-block"
+                  >Last name must contain only letters</small
+                >
+              }
             }
-            @if (registerForm.get('firstName')?.hasError('minlength')) {
-              <small class="text-danger font-mono mt-1 d-block"
-                >First name must be at least 2 characters long</small
-              >
-            }
-            @if (registerForm.get('firstName')?.hasError('maxlength')) {
-              <small class="text-danger font-mono mt-1 d-block"
-                >First name must be at most 25 characters long</small
-              >
-            }
-            @if (registerForm.get('firstName')?.hasError('pattern')) {
-              <small class="text-danger font-mono mt-1 d-block"
-                >First name must contain only letters</small
-              >
-            }
-          }
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="form-floating">
-            <input
-              type="text"
-              class="form-control border-book"
-              id="lastNameInput"
-              placeholder="Last Name"
-              formControlName="lastName"
-            />
-            <label for="lastNameInput" class="text-muted font-mono">Last Name</label>
           </div>
-          @if (registerForm.get('lastName')?.errors && registerForm.get('lastName')?.touched) {
-            @if (registerForm.get('lastName')?.hasError('required')) {
-              <small class="text-danger font-mono mt-1 d-block">Last name is required</small>
-            }
-            @if (registerForm.get('lastName')?.hasError('minlength')) {
+        </div>
+
+        <div class="form-floating mb-3">
+          <input
+            class="form-control border-book"
+            type="email"
+            id="emailInput"
+            formControlName="email"
+            placeholder="you&#64;example.com"
+          />
+          <label for="emailInput" class="text-muted font-mono">Email</label>
+          @if (registerForm.get('email')?.errors && registerForm.get('email')?.touched) {
+            @if (registerForm.get('email')?.hasError('required')) {
+              <small class="text-danger font-mono mt-1 d-block">Email is required</small>
+            } @else if (registerForm.get('email')?.hasError('email')) {
               <small class="text-danger font-mono mt-1 d-block"
-                >Last name must be at least 2 characters long</small
-              >
-            }
-            @if (registerForm.get('lastName')?.hasError('maxlength')) {
-              <small class="text-danger font-mono mt-1 d-block"
-                >Last name must be at most 25 characters long</small
-              >
-            }
-            @if (registerForm.get('lastName')?.hasError('pattern')) {
-              <small class="text-danger font-mono mt-1 d-block"
-                >Last name must contain only letters</small
+                >Please enter a valid email address</small
               >
             }
           }
         </div>
-      </div>
 
-      <div class="form-floating mb-3">
-        <input
-          class="form-control border-book"
-          type="email"
-          id="emailInput"
-          formControlName="email"
-          placeholder="you&#64;example.com"
-        />
-        <label for="emailInput" class="text-muted font-mono">Email</label>
-        @if (registerForm.get('email')?.errors && registerForm.get('email')?.touched) {
-          @if (registerForm.get('email')?.hasError('required')) {
-            <small class="text-danger font-mono mt-1 d-block">Email is required</small>
-          } @else if (registerForm.get('email')?.hasError('email')) {
-            <small class="text-danger font-mono mt-1 d-block"
-              >Please enter a valid email address</small
-            >
+        <div class="form-floating mb-3">
+          <input
+            class="form-control border-book"
+            type="date"
+            min="1900-01-01"
+            max="2011-12-31"
+            id="dobInput"
+            formControlName="dob"
+            placeholder="Date of Birth"
+          />
+          <label for="dobInput" class="text-muted font-mono">Date of Birth</label>
+          @if (registerForm.get('dob')?.errors && registerForm.get('dob')?.touched) {
+            <small class="text-danger font-mono mt-1 d-block">Date of birth is required</small>
           }
-        }
-      </div>
-
-      <div class="form-floating mb-3">
-        <input
-          class="form-control border-book"
-          type="date"
-          min="1900-01-01"
-          max="2011-12-31"
-          id="dobInput"
-          formControlName="dob"
-          placeholder="Date of Birth"
-        />
-        <label for="dobInput" class="text-muted font-mono">Date of Birth</label>
-        @if (registerForm.get('dob')?.errors && registerForm.get('dob')?.touched) {
-          <small class="text-danger font-mono mt-1 d-block">Date of birth is required</small>
-        }
-      </div>
-
-      <div class="form-floating mb-3 position-relative">
-        <input
-          class="form-control border-book pe-5"
-          [type]="showPassword ? 'text' : 'password'"
-          id="passwordInput"
-          formControlName="password"
-          placeholder="Min 8 chars, uppercase, number"
-          (copy)="$event.preventDefault()"
-          (paste)="$event.preventDefault()"
-        />
-        <label for="passwordInput" class="text-muted font-mono">Password</label>
-        <span
-          class="password-toggle"
-          (click)="showPassword = !showPassword"
-          role="button"
-          [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-        >
-          <i
-            class="fa-solid"
-            [class.fa-eye]="!showPassword"
-            [class.fa-eye-slash]="showPassword"
-          ></i>
-        </span>
-        @if (registerForm.get('password')?.errors && registerForm.get('password')?.touched) {
-          @if (registerForm.get('password')?.hasError('required')) {
-            <small class="text-danger font-mono mt-1 d-block">Password is required</small>
-          } @else if (registerForm.get('password')?.hasError('pattern')) {
-            <small class="text-danger font-mono mt-1 d-block"
-              >Password must be 8–50 chars with uppercase, lowercase, and a number</small
-            >
-          }
-        }
-      </div>
-
-      <div class="form-floating mb-3 position-relative">
-        <input
-          class="form-control border-book pe-5"
-          [type]="showReconfirmPassword ? 'text' : 'password'"
-          id="reconfirmPasswordInput"
-          formControlName="reconfirmPassword"
-          placeholder="Reconfirm Password"
-          (copy)="$event.preventDefault()"
-          (paste)="$event.preventDefault()"
-        />
-        <label for="reconfirmPasswordInput" class="text-muted font-mono">Reconfirm Password</label>
-        <span
-          class="password-toggle"
-          (click)="showReconfirmPassword = !showReconfirmPassword"
-          role="button"
-          [attr.aria-label]="showReconfirmPassword ? 'Hide password' : 'Show password'"
-        >
-          <i
-            class="fa-solid"
-            [class.fa-eye]="!showReconfirmPassword"
-            [class.fa-eye-slash]="showReconfirmPassword"
-          ></i>
-        </span>
-        @if (
-          registerForm.get('reconfirmPassword')?.errors &&
-          registerForm.get('reconfirmPassword')?.touched
-        ) {
-          @if (registerForm.get('reconfirmPassword')?.hasError('required')) {
-            <small class="text-danger font-mono mt-1 d-block">Please confirm your password</small>
-          } @else if (registerForm.get('reconfirmPassword')?.hasError('matchValidator')) {
-            <small class="text-danger font-mono mt-1 d-block">Passwords do not match</small>
-          }
-        }
-      </div>
-
-      <!-- Server Error Display -->
-      @if (serverError()) {
-        <div
-          class="alert alert-danger d-flex align-items-center font-mono small mt-3 mb-0 rounded-3"
-          role="alert"
-        >
-          <i class="fa-solid fa-circle-exclamation me-2"></i>
-          {{ serverError() }}
         </div>
-      }
 
-      <button
-        class="btn btn-book-accent btn-register-submit w-100 fw-bold font-mono py-3 mt-4 rounded-3 shadow-sm text-uppercase d-flex align-items-center justify-content-center"
-        type="submit"
-        [disabled]="registerForm.invalid || isLoading()"
-      >
-        @if (isLoading()) {
-          <i class="fa-solid fa-spinner fa-spin me-2"></i>
-        } @else {
-          <i class="fa-solid fa-user-plus me-2"></i>
-          Create Account
+        <div class="form-floating mb-3 position-relative">
+          <input
+            class="form-control border-book pe-5"
+            [type]="showPassword ? 'text' : 'password'"
+            id="passwordInput"
+            formControlName="password"
+            placeholder="Min 8 chars, uppercase, number"
+            (copy)="$event.preventDefault()"
+            (paste)="$event.preventDefault()"
+          />
+          <label for="passwordInput" class="text-muted font-mono">Password</label>
+          <span
+            class="password-toggle"
+            (click)="showPassword = !showPassword"
+            role="button"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <i
+              class="fa-solid"
+              [class.fa-eye]="!showPassword"
+              [class.fa-eye-slash]="showPassword"
+            ></i>
+          </span>
+          @if (registerForm.get('password')?.errors && registerForm.get('password')?.touched) {
+            @if (registerForm.get('password')?.hasError('required')) {
+              <small class="text-danger font-mono mt-1 d-block">Password is required</small>
+            } @else if (registerForm.get('password')?.hasError('pattern')) {
+              <small class="text-danger font-mono mt-1 d-block"
+                >Password must be 8–50 chars with uppercase, lowercase, and a number</small
+              >
+            }
+          }
+        </div>
+
+        <div class="form-floating mb-3 position-relative">
+          <input
+            class="form-control border-book pe-5"
+            [type]="showReconfirmPassword ? 'text' : 'password'"
+            id="reconfirmPasswordInput"
+            formControlName="reconfirmPassword"
+            placeholder="Reconfirm Password"
+            (copy)="$event.preventDefault()"
+            (paste)="$event.preventDefault()"
+          />
+          <label for="reconfirmPasswordInput" class="text-muted font-mono"
+            >Reconfirm Password</label
+          >
+          <span
+            class="password-toggle"
+            (click)="showReconfirmPassword = !showReconfirmPassword"
+            role="button"
+            [attr.aria-label]="showReconfirmPassword ? 'Hide password' : 'Show password'"
+          >
+            <i
+              class="fa-solid"
+              [class.fa-eye]="!showReconfirmPassword"
+              [class.fa-eye-slash]="showReconfirmPassword"
+            ></i>
+          </span>
+          @if (
+            registerForm.get('reconfirmPassword')?.errors &&
+            registerForm.get('reconfirmPassword')?.touched
+          ) {
+            @if (registerForm.get('reconfirmPassword')?.hasError('required')) {
+              <small class="text-danger font-mono mt-1 d-block">Please confirm your password</small>
+            } @else if (registerForm.get('reconfirmPassword')?.hasError('matchValidator')) {
+              <small class="text-danger font-mono mt-1 d-block">Passwords do not match</small>
+            }
+          }
+        </div>
+
+        <!-- Server Error Display -->
+        @if (serverError()) {
+          <div
+            class="alert alert-danger d-flex align-items-center font-mono small mt-3 mb-0 rounded-3"
+            role="alert"
+          >
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            {{ serverError() }}
+          </div>
         }
-      </button>
-    </form>
 
-    <div class="text-center mt-3 small text-muted">
-      Already have an account?
-      <a
-        routerLink="/auth/login"
-        class="fw-bold text-decoration-underline"
-        style="color: var(--book-primary)"
-        >Sign in</a
-      >
+        <button
+          class="btn btn-book-accent btn-register-submit w-100 fw-bold font-mono py-3 mt-4 rounded-3 shadow-sm text-uppercase d-flex align-items-center justify-content-center"
+          type="submit"
+          [disabled]="registerForm.invalid || isLoading()"
+        >
+          @if (isLoading()) {
+            <i class="fa-solid fa-spinner fa-spin me-2"></i>
+          } @else {
+            <i class="fa-solid fa-user-plus me-2"></i>
+            Create Account
+          }
+        </button>
+      </form>
+
+      <div class="text-center mt-3 small text-muted">
+        Already have an account?
+        <a
+          routerLink="/auth/login"
+          class="fw-bold text-decoration-underline"
+          style="color: var(--book-primary)"
+          >Sign in</a
+        >
+      </div>
     </div>
   </div>
 </div>
