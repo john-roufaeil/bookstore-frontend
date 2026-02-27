@@ -40,19 +40,28 @@
         </td>
         <td>{{ (order.items || []).length }}</td>
         <td>${{ orderTotal(order) | number:'1.2-2' }}</td>
-        <td><span class="badge rounded-pill text-bg-light border">{{ order.status }}</span></td>
+        <td>{{ formatStatus(order.status) }}</td>
         <td>
           <span class="badge rounded-pill" [class.text-bg-warning]="order.paymentStatus === 'pending'"
             [class.text-bg-success]="order.paymentStatus === 'success'">
-            {{ order.paymentStatus }}
+            {{ formatPayment(order.paymentStatus) }}
           </span>
         </td>
         <td class="text-muted">{{ order.createdAt ? (order.createdAt | date:'medium') : '—' }}</td>
         <td class="text-end">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn btn-book-outline" (click)="openView(order)">View</button>
-            <button type="button" class="btn btn-book-outline" (click)="openEdit(order)">Edit</button>
-            <button type="button" class="btn btn-outline-danger" (click)="openDelete(order)">Delete</button>
+            @if (getNextStatus(order.status)) {
+            <button type="button" class="btn btn-book-primary" [disabled]="saving()" (click)="openAdvance(order)">
+              @if (order.status === 'processing') {
+              <i class="bi bi-truck me-1" aria-hidden="true"></i>
+              Delivering
+              } @else {
+              <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>
+              Delivered
+              }
+            </button>
+            }
           </div>
         </td>
       </tr>
@@ -68,11 +77,11 @@
     </div>
     <div class="col-12 col-lg-6">
       <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Status</div>
-      <div>{{ selectedOrder?.status }}</div>
+      <div>{{ formatStatus(selectedOrder?.status ?? '') }}</div>
     </div>
     <div class="col-12 col-lg-6">
       <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Payment</div>
-      <div>{{ selectedOrder?.paymentStatus }}</div>
+      <div>{{ formatPayment(selectedOrder?.paymentStatus ?? '') }}</div>
     </div>
     <div class="col-12 col-lg-6">
       <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Total</div>
@@ -93,7 +102,7 @@
           <tbody>
             @for (item of (selectedOrder?.items || []); track $index) {
             <tr>
-              <td class="text-brown fw-semibold">{{ item.book?.name ?? '—' }}</td>
+              <td class="text-brown fw-semibold">{{ item.bookId?.name ?? '—' }}</td>
               <td>{{ item.quantity }}</td>
               <td>${{ item.priceAtPurchase | number:'1.2-2' }}</td>
             </tr>
@@ -109,30 +118,7 @@
   </div>
 </app-admin-modal>
 
-<app-admin-form-modal [open]="formOpen()" [title]="'Edit Order'" submitText="Save" (submitted)="saveDraft()"
-  (closed)="closeForm()">
-  <div class="row g-3">
-    <div class="col-12 col-lg-6">
-      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Status</label>
-      <select class="form-select border-book" [ngModel]="draft().status"
-        (ngModelChange)="draft.set({ ...draft(), status: $event })" name="orderStatus">
-        <option value="processing">Processing</option>
-        <option value="out_for_delivery">Out for delivery</option>
-        <option value="delivered">Delivered</option>
-      </select>
-    </div>
-
-    <div class="col-12 col-lg-6">
-      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Payment</label>
-      <select class="form-select border-book" [ngModel]="draft().paymentStatus"
-        (ngModelChange)="draft.set({ ...draft(), paymentStatus: $event })" name="orderPayment">
-        <option value="pending">Pending</option>
-        <option value="success">Success</option>
-      </select>
-    </div>
-  </div>
-</app-admin-form-modal>
-
-<app-admin-confirm-modal [open]="deleteOpen()" title="Delete order"
-  [message]="'Delete order #' + ((selectedForDelete()?._id || '').slice(-6)) + '?'" confirmText="Delete"
-  (confirmed)="confirmDelete()" (closed)="closeDelete()"></app-admin-confirm-modal>
+<app-admin-confirm-modal [open]="advanceOpen()" title="Advance order status"
+  [message]="'Move order #' + ((selectedForAdvance()?._id || '').slice(-6)) + ' to ' + formatStatus(nextStatus() || '') + '? This cannot be undone.'"
+  [confirmText]="saving() ? 'Saving...' : 'Confirm'" [confirmDisabled]="saving()" confirmClass="btn-book-primary"
+  (confirmed)="confirmAdvance()" (closed)="closeAdvance()"></app-admin-confirm-modal>

@@ -67,16 +67,16 @@
                 <div class="col-lg-8">
                   <h6 class="fw-bold mb-3 small text-uppercase text-muted">Items Ordered</h6>
                   <div class="card border-0 shadow-none bg-transparent">
-                    @for (item of order.items; track item.book._id) {
+                    @for (item of order.items; track item.bookId._id) {
                       <div class="d-flex align-items-center mb-3">
                         <img
-                          [src]="item.book.coverImage"
-                          [alt]="item.book.name"
+                          [src]="item.bookId.coverImage"
+                          [alt]="item.bookId.name"
                           class="rounded-2 border shadow-sm"
                           style="width: 40px; height: 60px; object-fit: cover"
                         />
                         <div class="ms-3">
-                          <div class="fw-bold small">{{ item.book.name }}</div>
+                          <div class="fw-bold small">{{ item.bookId.name }}</div>
                           <div class="text-muted small">
                             {{ item.quantity }} x {{ item.priceAtPurchase | currency }}
                           </div>

@@ -2,9 +2,9 @@
 import { Book } from "./book.model";
 
 export interface OrderItem {
-  book:Book;
+  bookId: Book;
   quantity: number;
-  priceAtPurchase: number;  
+  priceAtPurchase: number;
 }
 
 export interface ShippingDetails {

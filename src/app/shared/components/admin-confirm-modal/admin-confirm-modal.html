@@ -3,7 +3,7 @@
 
   <div footer class="d-flex gap-2">
     <button type="button" class="btn btn-book-outline" (click)="closed.emit()">Cancel</button>
-    <button type="button" class="btn btn-danger" [disabled]="confirmDisabled" (click)="confirmed.emit()">
+    <button type="button" class="btn" [ngClass]="confirmClass" [disabled]="confirmDisabled" (click)="confirmed.emit()">
       {{ confirmText }}
     </button>
   </div>

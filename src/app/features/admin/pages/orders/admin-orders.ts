@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { AdminToolbar } from '../../../../shared/components/admin-toolbar/admin-toolbar';
 import { AdminModal } from '../../../../shared/components/admin-modal/admin-modal';
 import { finalize, timeout } from 'rxjs/operators';
-import { AdminFormModal } from '../../../../shared/components/admin-form-modal/admin-form-modal';
 import { AdminConfirmModal } from '../../../../shared/components/admin-confirm-modal/admin-confirm-modal';
 import { AdminTable, AdminTableColumn } from '../../../../shared/components/admin-table/admin-table';
 import { Order } from '../../../../core/models';
@@ -22,7 +21,6 @@ type SortType = 'createdAt:desc' | 'createdAt:asc' | 'total:desc' | 'total:asc' 
     AdminToolbar,
     AdminTable,
     AdminModal,
-    AdminFormModal,
     AdminConfirmModal,
   ],
   templateUrl: './admin-orders.html',
@@ -30,6 +28,7 @@ type SortType = 'createdAt:desc' | 'createdAt:asc' | 'total:desc' | 'total:asc' 
 })
 export class AdminOrders implements OnInit {
   loading = signal(true);
+  saving = signal(false);
   errorMessage = signal('');
 
   statusFilter = '';
@@ -55,11 +54,9 @@ export class AdminOrders implements OnInit {
   viewOpen = false;
   selectedOrder: Order | null = null;
 
-  formOpen = signal(false);
-  deleteOpen = signal(false);
-  editingId = signal<string | null>(null);
-  selectedForDelete = signal<Order | null>(null);
-  draft = signal<{ status: string; paymentStatus: string }>({ status: 'processing', paymentStatus: 'pending' });
+  advanceOpen = signal(false);
+  selectedForAdvance = signal<Order | null>(null);
+  nextStatus = signal<Order['status'] | null>(null);
 
   constructor(private http: HttpClient) { }
 
@@ -82,7 +79,7 @@ export class AdminOrders implements OnInit {
         next: (res) => {
           this.orders.set(res.data.data ? res.data.data : []);
         },
-        error: (err) => {
+        error: () => {
           this.orders.set([]);
           this.errorMessage.set('Failed to load orders.');
         },
@@ -112,52 +109,43 @@ export class AdminOrders implements OnInit {
     this.selectedOrder = null;
   }
 
-  openEdit(order: Order): void {
-    this.editingId.set(order?._id ?? null);
-    this.draft.set({
-      status: String(order?.status ?? 'processing'),
-      paymentStatus: String(order?.paymentStatus ?? 'pending'),
-    });
-    this.formOpen.set(true);
+  openAdvance(order: Order): void {
+    const next = this.getNextStatus(order?.status);
+    if (!next) return;
+    this.selectedForAdvance.set(order);
+    this.nextStatus.set(next);
+    this.advanceOpen.set(true);
   }
 
-  closeForm(): void {
-    this.formOpen.set(false);
+  closeAdvance(): void {
+    this.advanceOpen.set(false);
+    this.selectedForAdvance.set(null);
+    this.nextStatus.set(null);
   }
 
-  saveDraft(): void {
-    const id = this.editingId();
-    const draft = this.draft();
+  confirmAdvance(): void {
+    const order = this.selectedForAdvance();
+    const status = this.nextStatus();
+    if (!order?._id || !status) return;
 
-    if (id) {
-      this.orders.set(this.orders().map((o) =>
-        o?._id === id
-          ? {
-              ...o,
-              status: draft.status as Order['status'],
-              paymentStatus: draft.paymentStatus as Order['paymentStatus'],
-            }
-          : o
-      ));
-    }
-    this.formOpen.set(false);
-  }
+    this.saving.set(true);
+    this.errorMessage.set('');
 
-  openDelete(order: Order): void {
-    this.selectedForDelete.set(order);
-    this.deleteOpen.set(true);
-  }
-
-  closeDelete(): void {
-    this.deleteOpen.set(false);
-    this.selectedForDelete.set(null);
-  }
-
-  confirmDelete(): void {
-    const selected = this.selectedForDelete();
-    if (!selected?._id) return;
-    this.orders.set(this.orders().filter((o) => o?._id !== selected._id));
-    this.closeDelete();
+    this.http
+      .patch<any>(`${environment.apiUrl}/orders/${order._id}`, { status })
+      .pipe(
+        timeout(15000),
+        finalize(() => this.saving.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.closeAdvance();
+          this.fetchOrders();
+        },
+        error: () => {
+          this.errorMessage.set('Failed to update order status.');
+        },
+      });
   }
 
   orderTotal(order: Order): number {
@@ -198,5 +186,24 @@ export class AdminOrders implements OnInit {
 
   get rows(): Order[] {
     return this.pagedOrders;
+  }
+
+  formatStatus(status: string): string {
+    if (!status) return '';
+    return status
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
+  formatPayment(payment: string): string {
+    if (!payment) return '';
+    return payment.charAt(0).toUpperCase() + payment.slice(1);
+  }
+
+  getNextStatus(current: Order['status'] | string | null | undefined): Order['status'] | null {
+    if (current === 'processing') return 'out_for_delivery';
+    if (current === 'out_for_delivery') return 'delivered';
+    return null;
   }
 }

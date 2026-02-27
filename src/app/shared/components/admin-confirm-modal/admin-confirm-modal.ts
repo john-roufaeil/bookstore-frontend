@@ -14,8 +14,8 @@ export class AdminConfirmModal {
   @Input() message = 'Are you sure?';
   @Input() confirmText = 'Delete';
   @Input() confirmDisabled = false;
+  @Input() confirmClass = 'btn-danger';
 
   @Output() confirmed = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
 }
-
