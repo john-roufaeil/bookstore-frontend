@@ -8,13 +8,14 @@ import { EmptyState } from '../../../shared/components/empty-state/empty-state';
 import { BookService } from '../../../core/services/book.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { AuthorService } from '../../../core/services/author.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-book-list',
   standalone: true,
   imports: [CommonModule, FormsModule, BookCard, BookFilters, Pagination, EmptyState],
   templateUrl: './book-list.html',
-  styleUrl: './book-list.css'
+  styleUrl: './book-list.css',
 })
 export class BookList implements OnInit {
   loading = signal(true);
@@ -27,7 +28,7 @@ export class BookList implements OnInit {
     category: '',
     author: '',
     minPrice: null,
-    maxPrice: null
+    maxPrice: null,
   });
 
   books = signal<any[]>([]);
@@ -37,8 +38,9 @@ export class BookList implements OnInit {
   constructor(
     private bookService: BookService,
     private categoryService: CategoryService,
-    private authorService: AuthorService
-  ) { }
+    private authorService: AuthorService,
+    private cartService: CartService,
+  ) {}
 
   ngOnInit(): void {
     this.loadFilters();
@@ -47,10 +49,10 @@ export class BookList implements OnInit {
 
   loadFilters(): void {
     this.categoryService.getCategories().subscribe({
-      next: (data) => this.categories.set(data || [])
+      next: (data) => this.categories.set(data || []),
     });
     this.authorService.getAuthors().subscribe({
-      next: (data) => this.authors.set(data || [])
+      next: (data) => this.authors.set(data || []),
     });
   }
 
@@ -59,7 +61,7 @@ export class BookList implements OnInit {
     const filters = this.currentFilters();
     const params: any = {
       page: this.currentPage(),
-      limit: this.limit()
+      limit: this.limit(),
     };
 
     if (filters.search) params.search = filters.search;
@@ -74,7 +76,7 @@ export class BookList implements OnInit {
         this.totalPages.set(data.totalPages || 1);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => this.loading.set(false),
     });
   }
 
@@ -90,7 +92,7 @@ export class BookList implements OnInit {
       category: '',
       author: '',
       minPrice: null,
-      maxPrice: null
+      maxPrice: null,
     });
     this.currentPage.set(1);
     this.loadBooks();
@@ -102,6 +104,6 @@ export class BookList implements OnInit {
   }
 
   onAddToCart(book: any): void {
-    alert(`Added "${book.name}" to cart!`);
+    this.cartService.addToCart(book._id);
   }
 }
