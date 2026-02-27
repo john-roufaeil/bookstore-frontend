@@ -7,7 +7,7 @@ import { BookService } from '../../../core/services/book.service';
 @Component({
   selector: 'app-book-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, StarRating],
   templateUrl: './book-detail.html',
   styleUrl: './book-detail.css'
 })
