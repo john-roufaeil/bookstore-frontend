@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service/auth-service';
+import { CartService } from '../../../core/services/cart.service';
 import { inject } from '@angular/core';
 
 @Component({
@@ -13,6 +14,7 @@ import { inject } from '@angular/core';
 export class Login implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly cartService = inject(CartService);
 
   isLoading = signal(false);
   showPassword = false;
@@ -42,6 +44,7 @@ export class Login implements OnInit {
     this.authService.loginForm(formData).subscribe({
       next: () => {
         this.isLoading.set(false);
+        this.cartService.refreshCart();
         this.router.navigate(['/']);
       },
       error: (err) => {

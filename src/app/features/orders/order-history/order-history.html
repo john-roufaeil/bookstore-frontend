@@ -1,1 +1,127 @@
-<p>order-history works!</p>
+<div class="container py-5 fade-in">
+  <div class="d-flex align-items-center mb-4">
+    <h1 class="font-serif fw-bold mb-0 me-3">My Orders</h1>
+    <span class="badge bg-light text-muted border rounded-pill">{{ orders().length }} total</span>
+  </div>
+
+  @if (isLoading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-brown" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-3">Loading your orders...</p>
+    </div>
+  } @else if (orders().length > 0) {
+    <div
+      class="accordion accordion-flush rounded-4 overflow-hidden border shadow-sm"
+      id="ordersAccordion"
+    >
+      @for (order of orders(); track order._id; let first = $first) {
+        <div class="accordion-item border-0 border-bottom">
+          <h2 class="accordion-header">
+            <button
+              class="accordion-button py-4 px-4 shadow-none"
+              type="button"
+              [class.collapsed]="!first"
+              [attr.data-bs-toggle]="'collapse'"
+              [attr.data-bs-target]="'#collapse' + order._id"
+            >
+              <div class="d-flex flex-wrap align-items-center w-100 gap-3">
+                <div class="me-auto text-start">
+                  <div class="fw-bold text-brown mb-1">{{ order._id }}</div>
+                  <div class="small text-muted">
+                    Placed on {{ order.createdAt | date: 'mediumDate' }}
+                  </div>
+                </div>
+
+                <div class="text-start pe-lg-4">
+                  <div
+                    class="small text-muted text-uppercase fw-bold"
+                    style="font-size: 10px; letter-spacing: 0.5px"
+                  >
+                    Total
+                  </div>
+                  <div class="fw-bold">{{ getOrderTotal(order) | currency }}</div>
+                </div>
+
+                <div class="text-start pe-lg-4">
+                  <span
+                    class="badge rounded-pill px-3 py-2"
+                    [ngClass]="getStatusClass(order.status)"
+                  >
+                    {{ order.status | titlecase }}
+                  </span>
+                </div>
+              </div>
+            </button>
+          </h2>
+          <div
+            [id]="'collapse' + order._id"
+            class="accordion-collapse collapse"
+            [class.show]="first"
+            data-bs-parent="#ordersAccordion"
+          >
+            <div class="accordion-body bg-light bg-opacity-25 px-4 py-4">
+              <div class="row g-4">
+                <!-- Order Items -->
+                <div class="col-lg-8">
+                  <h6 class="fw-bold mb-3 small text-uppercase text-muted">Items Ordered</h6>
+                  <div class="card border-0 shadow-none bg-transparent">
+                    @for (item of order.items; track item.book._id) {
+                      <div class="d-flex align-items-center mb-3">
+                        <img
+                          [src]="item.book.coverImage"
+                          [alt]="item.book.name"
+                          class="rounded-2 border shadow-sm"
+                          style="width: 40px; height: 60px; object-fit: cover"
+                        />
+                        <div class="ms-3">
+                          <div class="fw-bold small">{{ item.book.name }}</div>
+                          <div class="text-muted small">
+                            {{ item.quantity }} x {{ item.priceAtPurchase | currency }}
+                          </div>
+                        </div>
+                        <div class="ms-auto fw-bold small">
+                          {{ item.priceAtPurchase * item.quantity | currency }}
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="col-lg-4">
+                  <div class="p-3 bg-white rounded-3 border h-100 shadow-sm">
+                    <h6 class="fw-bold mb-2 small text-uppercase text-muted">Shipping Address</h6>
+                    <p class="mb-1 small fw-medium">{{ order.shippingDetails.fullName }}</p>
+                    <p class="mb-1 small text-muted">{{ order.shippingDetails.address }}</p>
+                    <p class="mb-0 small text-muted">{{ order.shippingDetails.city }}</p>
+                    <hr class="my-3 opacity-25" />
+                    <div class="small text-muted">
+                      <strong>Phone:</strong> {{ order.shippingDetails.phone }}
+                    </div>
+                    <div class="small text-muted mt-1">
+                      <strong>Payment:</strong> {{ order.paymentMethod }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Empty State -->
+    <div class="text-center py-5">
+      <div class="mb-4">
+        <i class="fa-solid fa-box-open opacity-25" style="font-size: 80px"></i>
+      </div>
+      <h3 class="fw-bold text-brown">No orders yet</h3>
+      <p class="text-muted mb-4">You haven't placed any orders. Start exploring our collection!</p>
+      <a routerLink="/books" class="btn btn-book-primary px-5 py-3 rounded-pill fw-bold shadow-sm">
+        Start Shopping
+      </a>
+    </div>
+  }
+</div>

@@ -1,6 +1,8 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../features/auth/auth.service/auth-service';
+import { CartService } from '../../core/services/cart.service';
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -9,8 +11,12 @@ import { AuthService } from '../../features/auth/auth.service/auth-service';
 })
 export class Navbar implements OnInit {
   private readonly authService = inject(AuthService);
-  cartItemCount = 10;
+  private cartService = inject(CartService);
   isDark = signal(false);
+
+  get cartItemCount() {
+    return this.cartService.cartCount();
+  }
 
   get isLoggedIn(): boolean {
     return this.authService.isLoggedIn();
@@ -21,7 +27,6 @@ export class Navbar implements OnInit {
   }
 
   ngOnInit(): void {
-    // Restore saved preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark');
