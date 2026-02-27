@@ -177,33 +177,70 @@ export class AdminBooks implements OnInit {
     const d = this.draft();
     const name = d.name.trim();
     if (!name) return;
+    d.stock = Math.floor(Number(d.stock) || 0);
 
-    const author = this.authors().find((a) => a?._id === d.authorId) ?? d.authorId;
-    const category =
-      this.categories().find((c) => c?._id === d.categoryId) ?? (d.categoryId ? d.categoryId : null);
+    const price = Number(d.price);
+    if (!Number.isFinite(price) || price < 1 || price > 1000) {
+      this.modalErrorMessage.set('Price must be between 1 and 1000.');
+      return;
+    }
 
-    const payload = {
+    const stock = Number(d.stock);
+    if (!Number.isFinite(stock) || stock < 0) {
+      this.modalErrorMessage.set('Stock cannot be negative.');
+      return;
+    }
+
+    const hasCover = Boolean(d.coverImage) || Boolean(this.selectedCoverFile());
+    if (!hasCover) {
+      this.modalErrorMessage.set('Cover image is required.');
+      return;
+    }
+
+    this.saving.set(true);
+    this.modalErrorMessage.set('');
+
+    const body: any = {
       name,
-      price: Number(d.price) || 0,
-      stock: Number(d.stock) || 0,
-      author,
-      category,
-      coverImage: this.coverPreview() ?? d.coverImage ?? '',
-      createdAt: new Date().toISOString(),
+      price,
+      stock,
+      author: d.authorId ? d.authorId : null,
+      category: d.categoryId ? d.categoryId : null,
     };
 
     const id = this.editingId();
-    if (id) {
-      this.books.set(this.books().map((b) => (b?._id === id ? { ...b, ...payload } : b)));
-    } else {
-      const newBook = {
-        _id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : String(Date.now()),
-        ...payload,
-      };
-      this.books.set([newBook, ...this.books()]);
-    }
+    const req = id ? this.bookService.updateBook(id, body) : this.bookService.createBook(body);
 
-    this.formOpen.set(false);
+    const coverFile = this.selectedCoverFile();
+    const coverUrl$ = coverFile ? this.uploadCoverToCloudinary(coverFile) : of(String(d.coverImage ?? ''));
+
+    coverUrl$
+      .pipe(
+        switchMap((coverUrl) => {
+          if (!coverUrl) return throwError(() => new Error('Missing cover upload URL.'));
+          body.coverImage = coverUrl;
+          return req.pipe(timeout(15000));
+        }),
+        finalize(() => {
+          this.saving.set(false);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.formOpen.set(false);
+          this.selectedCoverFile.set(null);
+          this.fetchBooks();
+        },
+        error: (err) => {
+          const msg =
+            String(err?.message ?? '') === 'Missing cover upload URL.'
+              ? 'Failed to upload cover image.'
+              : id
+                ? 'Failed to update book.'
+                : 'Failed to create book.';
+          this.modalErrorMessage.set(msg);
+        },
+      });
   }
 
   openDelete(book: any): void {
@@ -223,21 +260,74 @@ export class AdminBooks implements OnInit {
     this.modalErrorMessage.set('');
     const selected = this.selectedForDelete();
     if (!selected?._id) return;
-    this.books.set(this.books().filter((b) => b?._id !== selected._id));
-    this.closeDelete();
+
+    this.bookService
+      .deleteBook(selected._id)
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: () => {
+          this.closeDelete();
+          this.fetchBooks();
+        },
+        error: () => {
+          this.modalErrorMessage.set('Failed to delete book.');
+        },
+      });
   }
 
   onCoverFileChange(event: Event): void {
     const input = event.target as HTMLInputElement | null;
     const file = input?.files?.[0] ?? null;
     if (!file) return;
-    this.setCoverPreview(URL.createObjectURL(file));
+
+    const localPreview = URL.createObjectURL(file);
+    this.setCoverPreview(localPreview);
+    this.selectedCoverFile.set(file);
+    this.modalErrorMessage.set('');
   }
 
   private setCoverPreview(url: string | null): void {
     if (this.coverObjectUrl) URL.revokeObjectURL(this.coverObjectUrl);
     this.coverObjectUrl = url;
     this.coverPreview.set(url);
+  }
+
+  private uploadCoverToCloudinary(file: File): Observable<string> {
+    this.uploadingCover.set(true);
+    this.modalErrorMessage.set('');
+
+    return this.http.get<any>(`${environment.apiUrl}/cloudinary-signature`).pipe(
+      timeout(15000),
+      map((res) => res?.data ?? res),
+      switchMap((sig) => {
+        const signature = sig?.signature;
+        const timestamp = sig?.timestamp;
+        const apiKey = sig?.apiKey ?? sig?.api_key ?? environment.cloudinary?.apiKey;
+        const cloudName = sig?.cloudName ?? sig?.cloud_name ?? environment.cloudinary?.cloudName;
+        const folder = sig?.folder ?? environment.cloudinary?.folder;
+        const uploadUrl =
+          sig?.uploadUrl ?? (cloudName ? `https://api.cloudinary.com/v1_1/${cloudName}/image/upload` : null);
+
+        if (!signature || !timestamp || !apiKey || !uploadUrl) {
+          return throwError(() => new Error('Missing Cloudinary signature fields.'));
+        }
+
+        const form = new FormData();
+        form.append('file', file);
+        form.append('api_key', String(apiKey));
+        form.append('timestamp', String(timestamp));
+        form.append('signature', String(signature));
+        if (folder) form.append('folder', String(folder));
+        form.append('resource_type', 'image');
+        if (cloudName) form.append('cloudName', String(cloudName));
+
+        return this.http.post<any>(uploadUrl, form).pipe(
+          timeout(60000),
+          map((uploadRes) => String(uploadRes?.secure_url ?? uploadRes?.url ?? ''))
+        );
+      }),
+      finalize(() => this.uploadingCover.set(false))
+    );
   }
 
   displayAuthor(book: any): string {

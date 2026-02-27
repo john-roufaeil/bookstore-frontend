@@ -17,7 +17,7 @@
     </div>
 
     <p class="author-bio small text-muted mb-0 flex-grow-1">
-      {{ author.bio }}
+      {{ author.bio ? (author.bio.length > 150 ? (author.bio.slice(0, 150) + '...') : author.bio) : '' }}
     </p>
 
     <div class="author-cta mt-auto fw-semibold">
