@@ -1,4 +1,6 @@
-.placeholder {
-  min-height: 180px;
+.admin-search {
+  min-width: 240px;
 }
-
+:host {
+  display: block;
+}
