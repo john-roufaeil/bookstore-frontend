@@ -1,9 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth.service/auth-service';
 import { inject } from '@angular/core';
-
 
 export function matchValidator(controlName: string, matchingControlName: string): ValidatorFn {
   return (abstractControl: AbstractControl): ValidationErrors | null => {
@@ -47,14 +54,30 @@ export class Register implements OnInit {
   }
 
   formInit() {
-    this.registerForm = new FormGroup({
-      email: new FormControl(null, [Validators.required, Validators.email]),
-      password: new FormControl(null, [Validators.required, Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,50}/)]),
-      reconfirmPassword: new FormControl(null, [Validators.required]),
-      firstName: new FormControl(null, [Validators.required, Validators.minLength(2), Validators.maxLength(25), Validators.pattern('^[a-zA-Z]{2,25}$')]),
-      lastName: new FormControl(null, [Validators.required, Validators.minLength(2), Validators.maxLength(25), Validators.pattern('^[a-zA-Z]{2,25}$')]),
-      dob: new FormControl(null, [Validators.required]),
-    }, { validators: matchValidator('password', 'reconfirmPassword') });
+    this.registerForm = new FormGroup(
+      {
+        email: new FormControl(null, [Validators.required, Validators.email]),
+        password: new FormControl(null, [
+          Validators.required,
+          Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,50}/),
+        ]),
+        reconfirmPassword: new FormControl(null, [Validators.required]),
+        firstName: new FormControl(null, [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(25),
+          Validators.pattern('^[a-zA-Z]{2,25}$'),
+        ]),
+        lastName: new FormControl(null, [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(25),
+          Validators.pattern('^[a-zA-Z]{2,25}$'),
+        ]),
+        dob: new FormControl(null, [Validators.required]),
+      },
+      { validators: matchValidator('password', 'reconfirmPassword') },
+    );
   }
 
   submitRegisterForm() {

@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { StarRating } from '../../../shared/components/star-rating/star-rating';
 import { BookService } from '../../../core/services/book.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-book-detail',
   standalone: true,
   imports: [CommonModule, RouterLink, StarRating],
   templateUrl: './book-detail.html',
-  styleUrl: './book-detail.css'
+  styleUrl: './book-detail.css',
 })
 export class BookDetail implements OnInit {
   book = signal<any>(null);
@@ -17,11 +18,12 @@ export class BookDetail implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private bookService: BookService
-  ) { }
+    private bookService: BookService,
+    private cartService: CartService,
+  ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
         this.loading.set(true);
@@ -30,7 +32,7 @@ export class BookDetail implements OnInit {
             const enhancedBook = {
               ...data,
               averageRating: data.averageRating || 4.5,
-              reviewCount: data.reviewCount || 42
+              reviewCount: data.reviewCount || 42,
             };
             this.book.set(enhancedBook);
             this.loading.set(false);
@@ -38,7 +40,7 @@ export class BookDetail implements OnInit {
           error: (err) => {
             console.error('Error fetching book:', err);
             this.loading.set(false);
-          }
+          },
         });
       } else {
         this.loading.set(false);
@@ -47,6 +49,6 @@ export class BookDetail implements OnInit {
   }
 
   onAddToCart(): void {
-    alert(`Added "${this.book().name}" to cart!`);
+    this.cartService.addToCart(this.book()._id);
   }
 }

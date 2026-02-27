@@ -18,13 +18,13 @@ export class AuthService {
 
   loginForm(data: object): Observable<any> {
     return this.http.post<any>(environment.apiUrl + '/auth/login', data).pipe(
-      tap(res => {
+      tap((res) => {
         if (res.data?.token) {
           localStorage.setItem(this.TOKEN_KEY, res.data.token);
         } else if (res.token) {
           localStorage.setItem(this.TOKEN_KEY, res.token);
         }
-      })
+      }),
     );
   }
 
