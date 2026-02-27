@@ -1,4 +1,4 @@
 export const environment = {
-    production: true,
-    apiUrl: 'https://YOUR_BACKEND_URL/api'
+  production: true,
+  apiUrl: 'https://bookstore-backend-lake.vercel.app/',
 };
