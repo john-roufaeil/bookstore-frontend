@@ -1,0 +1,46 @@
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+  <div class="card-body p-0">
+    @if (error()) {
+    <div class="p-4">
+      <div class="alert alert-danger border-0 shadow-sm mb-0">{{ error() }}</div>
+    </div>
+    } @else if (loading()) {
+    <div class="p-4 text-muted small">Loading reviews…</div>
+    } @else if (reviews().length) {
+    <div class="list-group list-group-flush">
+      @for (review of reviews(); track review._id) {
+      <div class="list-group-item p-4">
+        <div class="d-flex align-items-start gap-3">
+          <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center flex-shrink-0"
+            style="width: 42px; height: 42px;">
+            <span class="fw-bold small text-muted text-uppercase">
+              {{ (review?.user?.firstName?.[0] ?? 'U') + (review?.user?.lastName?.[0] ?? '') }}
+            </span>
+          </div>
+
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+              <div class="fw-bold text-brown">
+                {{ `${review?.user?.firstName ?? ''} ${review?.user?.lastName ?? ''}`.trim() || 'Customer' }}
+              </div>
+              <div class="text-muted small">
+                {{ review.createdAt ? (review.createdAt | date:'mediumDate') : '' }}
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <app-star-rating [rating]="review.rating || 0" [readonly]="true"></app-star-rating>
+              <span class="text-muted small">{{ review.rating }}/5</span>
+            </div>
+
+            @if (review.comment) {
+            <div class="text-muted small lh-base">{{ review.comment }}</div>
+            }
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+</div>
