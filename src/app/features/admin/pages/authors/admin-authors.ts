@@ -27,7 +27,8 @@ type SortType =
 export class AdminAuthors implements OnInit {
   loading = signal(true);
   saving = signal(false);
-  errorMessage = signal('');
+  pageErrorMessage = signal('');
+  modalErrorMessage = signal('');
 
   search = '';
   sort: SortType = '';
@@ -57,7 +58,7 @@ export class AdminAuthors implements OnInit {
 
   fetchAuthors(): void {
     this.loading.set(true);
-    this.errorMessage.set('');
+    this.pageErrorMessage.set('');
 
     this.http
       .get<any>(`${environment.apiUrl}/authors`)
@@ -70,7 +71,7 @@ export class AdminAuthors implements OnInit {
           this.authors.set((res.data.authors) ? res.data.authors : []);
         },
         error: () => {
-          this.errorMessage.set('Failed to load authors.');
+          this.pageErrorMessage.set('Failed to load authors.');
         },
       });
   }
@@ -131,17 +132,20 @@ export class AdminAuthors implements OnInit {
   openCreate(): void {
     this.editingId.set(null);
     this.draft.set({ name: '', bio: '' });
+    this.modalErrorMessage.set('');
     this.formOpen.set(true);
   }
 
   openEdit(author: Author): void {
     this.editingId.set(author?._id ?? null);
     this.draft.set({ name: String(author?.name ?? ''), bio: String(author?.bio ?? '') });
+    this.modalErrorMessage.set('');
     this.formOpen.set(true);
   }
 
   closeForm(): void {
     this.formOpen.set(false);
+    this.modalErrorMessage.set('');
   }
 
   saveDraft(): void {
@@ -150,7 +154,7 @@ export class AdminAuthors implements OnInit {
     if (!trimmedName) return;
 
     this.saving.set(true);
-    this.errorMessage.set('');
+    this.modalErrorMessage.set('');
 
     const id = this.editingId();
     const body = { name: trimmedName, bio: bio?.trim() };
@@ -169,7 +173,7 @@ export class AdminAuthors implements OnInit {
           this.fetchAuthors();
         },
         error: () => {
-          this.errorMessage.set(id ? 'Failed to update author.' : 'Failed to create author.');
+          this.modalErrorMessage.set(id ? 'Failed to update author.' : 'Failed to create author.');
         },
       });
   }
@@ -178,12 +182,14 @@ export class AdminAuthors implements OnInit {
 
   openDelete(author: Author): void {
     this.selectedForDelete.set(author);
+    this.modalErrorMessage.set('');
     this.deleteOpen.set(true);
   }
 
   closeDelete(): void {
     this.deleteOpen.set(false);
     this.selectedForDelete.set(null);
+    this.modalErrorMessage.set('');
   }
 
   confirmDelete(): void {
@@ -191,7 +197,7 @@ export class AdminAuthors implements OnInit {
     if (!selected?._id) return;
 
     this.saving.set(true);
-    this.errorMessage.set('');
+    this.modalErrorMessage.set('');
 
     this.http
       .delete<any>(`${environment.apiUrl}/authors/${selected?._id}`)
@@ -204,7 +210,7 @@ export class AdminAuthors implements OnInit {
           this.fetchAuthors();
         },
         error: () => {
-          this.errorMessage.set('Failed to delete author.');
+          this.modalErrorMessage.set('Failed to delete author.');
         },
       });
   }

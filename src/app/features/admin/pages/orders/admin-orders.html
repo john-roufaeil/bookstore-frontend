@@ -25,8 +25,8 @@
     </select>
   </app-admin-toolbar>
 
-  @if (errorMessage()) {
-  <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  @if (pageErrorMessage()) {
+  <div class="alert alert-danger border-0 shadow-sm">{{ pageErrorMessage() }}</div>
   }
 
   <app-admin-table [columns]="columns" [rows]="pagedOrders" [loading]="loading()" emptyIcon="bi bi-bag-x"
@@ -120,5 +120,6 @@
 
 <app-admin-confirm-modal [open]="advanceOpen()" title="Advance order status"
   [message]="'Move order #' + ((selectedForAdvance()?._id || '').slice(-6)) + ' to ' + formatStatus(nextStatus() || '') + '? This cannot be undone.'"
+  [error]="modalErrorMessage()"
   [confirmText]="saving() ? 'Saving...' : 'Confirm'" [confirmDisabled]="saving()" confirmClass="btn-book-primary"
   (confirmed)="confirmAdvance()" (closed)="closeAdvance()"></app-admin-confirm-modal>

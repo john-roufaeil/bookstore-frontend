@@ -28,8 +28,8 @@
     </select>
   </app-admin-toolbar>
 
-  @if (errorMessage()) {
-  <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  @if (pageErrorMessage()) {
+  <div class="alert alert-danger border-0 shadow-sm">{{ pageErrorMessage() }}</div>
   }
 
   <app-admin-table [columns]="columns" [rows]="pagedReviews" [loading]="loading()" emptyIcon="bi bi-chat-left-text"
@@ -92,6 +92,7 @@
   [open]="deleteOpen()"
   title="Delete review"
   message="Delete this review?"
+  [error]="modalErrorMessage()"
   [confirmText]="saving() ? 'Deleting...' : 'Delete'"
   [confirmDisabled]="saving()"
   (confirmed)="confirmDelete()"

@@ -32,8 +32,8 @@
     </select>
   </app-admin-toolbar>
 
-  @if (errorMessage()) {
-  <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  @if (pageErrorMessage()) {
+  <div class="alert alert-danger border-0 shadow-sm">{{ pageErrorMessage() }}</div>
   }
 
   <app-admin-table [columns]="columns" [rows]="pagedBooks" [loading]="loading()" emptyText="No books found."
@@ -53,8 +53,12 @@
         <td>{{ displayCategory(book) }}</td>
         <td class="text-end">
           <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-book-outline" (click)="openEdit(book)">Edit</button>
-            <button type="button" class="btn btn-outline-danger" (click)="openDelete(book)">Delete</button>
+            <button type="button" class="btn btn-book-outline" [disabled]="saving()" (click)="openEdit(book)">
+              Edit
+            </button>
+            <button type="button" class="btn btn-outline-danger" [disabled]="saving()" (click)="openDelete(book)">
+              Delete
+            </button>
           </div>
         </td>
       </tr>
@@ -63,29 +67,37 @@
 </section>
 
 <app-admin-form-modal [open]="formOpen()" [title]="editingId() ? 'Edit Book' : 'Create Book'" submitText="Save"
-  [submitDisabled]="!draft().name.trim()" (submitted)="saveDraft()" (closed)="closeForm()">
+  [submitText]="saving() ? 'Saving...' : 'Save'"
+  [submitDisabled]="saving() || uploadingCover() || !draft().name.trim() || !draft().authorId" (submitted)="saveDraft()"
+  (closed)="closeForm()">
+  @if (modalErrorMessage()) {
+  <div class="alert alert-danger border-0 shadow-sm">{{ modalErrorMessage() }}</div>
+  }
+
   <div class="row g-3">
     <div class="col-12 col-lg-8">
       <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Name</label>
-      <input class="form-control border-book" [ngModel]="draft().name"
+      <input class="form-control border-book" [ngModel]="draft().name" [disabled]="saving()"
         (ngModelChange)="draft.set({ ...draft(), name: $event })" name="bookName" />
     </div>
 
     <div class="col-6 col-lg-2">
       <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Price</label>
-      <input class="form-control border-book" type="number" [ngModel]="draft().price"
-        (ngModelChange)="draft.set({ ...draft(), price: $event })" name="bookPrice" />
+      <input class="form-control border-book" type="number" [ngModel]="draft().price" [disabled]="saving()" min="1"
+        max="1000" step="0.01" (ngModelChange)="draft.set({ ...draft(), price: $event })" name="bookPrice" />
     </div>
 
     <div class="col-6 col-lg-2">
       <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Stock</label>
-      <input class="form-control border-book" type="number" [ngModel]="draft().stock"
-        (ngModelChange)="draft.set({ ...draft(), stock: $event })" name="bookStock" />
+      <input class="form-control border-book" type="number" [ngModel]="draft().stock" [disabled]="saving()" min="0"
+        max="1000" step="1"
+        (ngModelChange)="draft.set({ ...draft(), stock: $event })"
+        name="bookStock" />
     </div>
 
     <div class="col-12 col-lg-6">
       <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Author</label>
-      <select class="form-select border-book" [ngModel]="draft().authorId"
+      <select class="form-select border-book" [ngModel]="draft().authorId" [disabled]="saving()"
         (ngModelChange)="draft.set({ ...draft(), authorId: $event })" name="bookAuthor">
         <option value="">Select author…</option>
         @for (author of authors(); track author._id) {
@@ -96,7 +108,7 @@
 
     <div class="col-12 col-lg-6">
       <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Category</label>
-      <select class="form-select border-book" [ngModel]="draft().categoryId"
+      <select class="form-select border-book" [ngModel]="draft().categoryId" [disabled]="saving()"
         (ngModelChange)="draft.set({ ...draft(), categoryId: $event })" name="bookCategory">
         <option value="">None</option>
         @for (category of categories(); track category._id) {
@@ -119,7 +131,11 @@
         </div>
 
         <div class="flex-grow-1">
-          <input type="file" class="form-control border-book" accept="image/*" (change)="onCoverFileChange($event)" />
+          <input type="file" class="form-control border-book" accept="image/*" [disabled]="saving() || uploadingCover()"
+            (change)="onCoverFileChange($event)" />
+          @if (uploadingCover()) {
+          <div class="small text-muted mt-2">Uploading cover…</div>
+          }
         </div>
       </div>
     </div>
@@ -127,5 +143,6 @@
 </app-admin-form-modal>
 
 <app-admin-confirm-modal [open]="deleteOpen()" title="Delete book"
-  [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'" confirmText="Delete" (confirmed)="confirmDelete()"
+  [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'" [error]="modalErrorMessage()"
+  [confirmText]="saving() ? 'Deleting...' : 'Delete'" [confirmDisabled]="saving()" (confirmed)="confirmDelete()"
   (closed)="closeDelete()"></app-admin-confirm-modal>

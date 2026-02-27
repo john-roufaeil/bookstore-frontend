@@ -12,6 +12,7 @@ export class AdminConfirmModal {
   @Input() open = false;
   @Input() title = 'Confirm';
   @Input() message = 'Are you sure?';
+  @Input() error = '';
   @Input() confirmText = 'Delete';
   @Input() confirmDisabled = false;
   @Input() confirmClass = 'btn-danger';

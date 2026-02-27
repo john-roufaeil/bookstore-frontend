@@ -24,8 +24,8 @@
     </select>
   </app-admin-toolbar>
 
-  @if (errorMessage()) {
-    <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  @if (pageErrorMessage()) {
+    <div class="alert alert-danger border-0 shadow-sm">{{ pageErrorMessage() }}</div>
   }
 
   <app-admin-table
@@ -64,6 +64,10 @@
   (submitted)="saveDraft()"
   (closed)="closeForm()"
 >
+  @if (modalErrorMessage()) {
+    <div class="alert alert-danger border-0 shadow-sm">{{ modalErrorMessage() }}</div>
+  }
+
   <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Name</label>
   <input
     class="form-control border-book"
@@ -78,6 +82,7 @@
   [open]="deleteOpen()"
   title="Delete category"
   [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'"
+  [error]="modalErrorMessage()"
   [confirmText]="saving() ? 'Deleting...' : 'Delete'"
   [confirmDisabled]="saving()"
   (confirmed)="confirmDelete()"

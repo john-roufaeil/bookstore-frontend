@@ -31,7 +31,8 @@ type SortType = 'createdAt:desc' | 'createdAt:asc' | 'rating:desc' | 'rating:asc
 export class AdminReviews implements OnInit {
   loading = signal(true);
   saving = signal(false);
-  errorMessage = signal('');
+  pageErrorMessage = signal('');
+  modalErrorMessage = signal('');
 
   reviews = signal<Review[]>([]);
 
@@ -58,7 +59,7 @@ export class AdminReviews implements OnInit {
 
   fetchReviews(): void {
     this.loading.set(true);
-    this.errorMessage.set('');
+    this.pageErrorMessage.set('');
     this.http
       .get<any>(`${environment.apiUrl}/reviews`)
       .pipe(
@@ -71,7 +72,7 @@ export class AdminReviews implements OnInit {
         },
         error: () => {
           this.reviews.set([]);
-          this.errorMessage.set('Failed to load reviews.');
+          this.pageErrorMessage.set('Failed to load reviews.');
         }
       });
   }
@@ -97,12 +98,14 @@ export class AdminReviews implements OnInit {
 
   openDelete(review: Review): void {
     this.selectedForDelete.set(review);
+    this.modalErrorMessage.set('');
     this.deleteOpen.set(true);
   }
 
   closeDelete(): void {
     this.deleteOpen.set(false);
     this.selectedForDelete.set(null);
+    this.modalErrorMessage.set('');
   }
 
   confirmDelete(): void {
@@ -110,7 +113,7 @@ export class AdminReviews implements OnInit {
     if (!selected?._id) return;
 
     this.saving.set(true);
-    this.errorMessage.set('');
+    this.modalErrorMessage.set('');
 
     this.http
       .delete<any>(`${environment.apiUrl}/reviews/${selected._id}`)
@@ -124,7 +127,7 @@ export class AdminReviews implements OnInit {
           this.fetchReviews();
         },
         error: () => {
-          this.errorMessage.set('Failed to delete review.');
+          this.modalErrorMessage.set('Failed to delete review.');
         },
       });
   }

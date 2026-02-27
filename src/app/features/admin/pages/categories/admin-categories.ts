@@ -22,7 +22,8 @@ type SortType = 'createdAt:desc' | 'createdAt:asc' | '';
 export class AdminCategories implements OnInit {
   loading = signal(true);
   saving = signal(false);
-  errorMessage = signal('');
+  pageErrorMessage = signal('');
+  modalErrorMessage = signal('');
 
   search = '';
   sort: SortType = '';
@@ -52,7 +53,7 @@ export class AdminCategories implements OnInit {
 
   fetchCategories(): void {
     this.loading.set(true);
-    this.errorMessage.set('');
+    this.pageErrorMessage.set('');
     this.http
       .get<any>(`${environment.apiUrl}/categories`)
       .pipe(
@@ -64,7 +65,7 @@ export class AdminCategories implements OnInit {
           this.categories.set((res.data) ? res.data : []);
         },
         error: () => {
-          this.errorMessage.set('Failed to load categories.');
+          this.pageErrorMessage.set('Failed to load categories.');
         },
       });
   }
@@ -116,17 +117,20 @@ export class AdminCategories implements OnInit {
   openCreate(): void {
     this.editingId.set(null);
     this.draftName.set('');
+    this.modalErrorMessage.set('');
     this.formOpen.set(true);
   }
 
   openEdit(category: Category): void {
     this.editingId.set(category?._id ?? null);
     this.draftName.set(String(category?.name ?? ''));
+    this.modalErrorMessage.set('');
     this.formOpen.set(true);
   }
 
   closeForm(): void {
     this.formOpen.set(false);
+    this.modalErrorMessage.set('');
   }
 
   saveDraft(): void {
@@ -135,7 +139,7 @@ export class AdminCategories implements OnInit {
 
     const id = this.editingId();
     this.saving.set(true);
-    this.errorMessage.set('');
+    this.modalErrorMessage.set('');
 
     const body = { name };
     const req = id
@@ -153,19 +157,21 @@ export class AdminCategories implements OnInit {
           this.fetchCategories();
         },
         error: () => {
-          this.errorMessage.set(id ? 'Failed to update category.' : 'Failed to create category.');
+          this.modalErrorMessage.set(id ? 'Failed to update category.' : 'Failed to create category.');
         },
       });
   }
 
   openDelete(category: Category): void {
     this.selectedForDelete.set(category);
+    this.modalErrorMessage.set('');
     this.deleteOpen.set(true);
   }
 
   closeDelete(): void {
     this.deleteOpen.set(false);
     this.selectedForDelete.set(null);
+    this.modalErrorMessage.set('');
   }
 
   confirmDelete(): void {
@@ -173,7 +179,7 @@ export class AdminCategories implements OnInit {
     if (!selected?._id) return;
 
     this.saving.set(true);
-    this.errorMessage.set('');
+    this.modalErrorMessage.set('');
 
     this.http
       .delete<any>(`${environment.apiUrl}/categories/${selected._id}`)
@@ -184,7 +190,7 @@ export class AdminCategories implements OnInit {
           this.fetchCategories();
         },
         error: () => {
-          this.errorMessage.set('Failed to delete category.');
+          this.modalErrorMessage.set('Failed to delete category.');
         },
       });
   }

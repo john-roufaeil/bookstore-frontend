@@ -29,7 +29,8 @@ type SortType = 'createdAt:desc' | 'createdAt:asc' | 'total:desc' | 'total:asc' 
 export class AdminOrders implements OnInit {
   loading = signal(true);
   saving = signal(false);
-  errorMessage = signal('');
+  pageErrorMessage = signal('');
+  modalErrorMessage = signal('');
 
   statusFilter = '';
   paymentFilter = '';
@@ -66,7 +67,7 @@ export class AdminOrders implements OnInit {
 
   fetchOrders(): void {
     this.loading.set(true);
-    this.errorMessage.set('');
+    this.pageErrorMessage.set('');
 
     this.http
       .get<any>(`${environment.apiUrl}/orders?page=1&limit=200`, {
@@ -81,7 +82,7 @@ export class AdminOrders implements OnInit {
         },
         error: () => {
           this.orders.set([]);
-          this.errorMessage.set('Failed to load orders.');
+          this.pageErrorMessage.set('Failed to load orders.');
         },
       });
   }
@@ -114,6 +115,7 @@ export class AdminOrders implements OnInit {
     if (!next) return;
     this.selectedForAdvance.set(order);
     this.nextStatus.set(next);
+    this.modalErrorMessage.set('');
     this.advanceOpen.set(true);
   }
 
@@ -121,6 +123,7 @@ export class AdminOrders implements OnInit {
     this.advanceOpen.set(false);
     this.selectedForAdvance.set(null);
     this.nextStatus.set(null);
+    this.modalErrorMessage.set('');
   }
 
   confirmAdvance(): void {
@@ -129,7 +132,7 @@ export class AdminOrders implements OnInit {
     if (!order?._id || !status) return;
 
     this.saving.set(true);
-    this.errorMessage.set('');
+    this.modalErrorMessage.set('');
 
     this.http
       .patch<any>(`${environment.apiUrl}/orders/${order._id}`, { status })
@@ -143,7 +146,7 @@ export class AdminOrders implements OnInit {
           this.fetchOrders();
         },
         error: () => {
-          this.errorMessage.set('Failed to update order status.');
+          this.modalErrorMessage.set('Failed to update order status.');
         },
       });
   }

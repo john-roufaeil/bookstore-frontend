@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize, timeout } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { finalize, map, switchMap, timeout } from 'rxjs/operators';
 
 import { AuthorService } from '../../../../core/services/author.service';
 import { BookService } from '../../../../core/services/book.service';
@@ -10,6 +12,7 @@ import { AdminConfirmModal } from '../../../../shared/components/admin-confirm-m
 import { AdminFormModal } from '../../../../shared/components/admin-form-modal/admin-form-modal';
 import { AdminToolbar } from '../../../../shared/components/admin-toolbar/admin-toolbar';
 import { AdminTable, AdminTableColumn } from '../../../../shared/components/admin-table/admin-table';
+import { environment } from '../../../../../environments/environment';
 
 type SortType = 'price:asc' | 'price:desc' | 'stock:asc' | 'stock:desc' | '';
 
@@ -22,7 +25,10 @@ type SortType = 'price:asc' | 'price:desc' | 'stock:asc' | 'stock:desc' | '';
 })
 export class AdminBooks implements OnInit {
   loading = signal(true);
-  errorMessage = signal('');
+  saving = signal(false);
+  uploadingCover = signal(false);
+  pageErrorMessage = signal('');
+  modalErrorMessage = signal('');
 
   search = '';
   authorFilter = '';
@@ -53,6 +59,7 @@ export class AdminBooks implements OnInit {
 
   coverObjectUrl: string | null = null;
   coverPreview = signal<string | null>(null);
+  selectedCoverFile = signal<File | null>(null);
 
   draft = signal<{
     name: string;
@@ -71,10 +78,11 @@ export class AdminBooks implements OnInit {
   });
 
   constructor(
+    private http: HttpClient,
     private bookService: BookService,
     private categoryService: CategoryService,
     private authorService: AuthorService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.fetchLookups();
@@ -93,7 +101,7 @@ export class AdminBooks implements OnInit {
 
   fetchBooks(): void {
     this.loading.set(true);
-    this.errorMessage.set('');
+    this.pageErrorMessage.set('');
 
     this.bookService
       .getBooks({ limit: 200 })
@@ -107,7 +115,7 @@ export class AdminBooks implements OnInit {
           this.books.set(items);
         },
         error: () => {
-          this.errorMessage.set('Failed to load books.');
+          this.pageErrorMessage.set('Failed to load books.');
         },
       });
   }
@@ -128,6 +136,8 @@ export class AdminBooks implements OnInit {
   openCreate(): void {
     this.editingId.set(null);
     this.setCoverPreview(null);
+    this.selectedCoverFile.set(null);
+    this.modalErrorMessage.set('');
     this.draft.set({
       name: '',
       price: 0,
@@ -145,10 +155,12 @@ export class AdminBooks implements OnInit {
 
     this.editingId.set(book?._id ?? null);
     this.setCoverPreview(book?.coverImage ?? null);
+    this.selectedCoverFile.set(null);
+    this.modalErrorMessage.set('');
     this.draft.set({
       name: String(book?.name ?? ''),
       price: Number(book?.price) || 0,
-      stock: Number(book?.stock) || 0,
+      stock: Math.floor(Number(book?.stock) || 0),
       authorId: String(authorId ?? ''),
       categoryId: String(categoryId ?? ''),
       coverImage: String(book?.coverImage ?? ''),
@@ -158,6 +170,7 @@ export class AdminBooks implements OnInit {
 
   closeForm(): void {
     this.formOpen.set(false);
+    this.modalErrorMessage.set('');
   }
 
   saveDraft(): void {
@@ -196,14 +209,18 @@ export class AdminBooks implements OnInit {
   openDelete(book: any): void {
     this.selectedForDelete.set(book);
     this.deleteOpen.set(true);
+    this.modalErrorMessage.set('');
   }
 
   closeDelete(): void {
     this.deleteOpen.set(false);
     this.selectedForDelete.set(null);
+    this.modalErrorMessage.set('');
   }
 
   confirmDelete(): void {
+    this.saving.set(true);
+    this.modalErrorMessage.set('');
     const selected = this.selectedForDelete();
     if (!selected?._id) return;
     this.books.set(this.books().filter((b) => b?._id !== selected._id));

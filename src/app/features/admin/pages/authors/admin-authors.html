@@ -16,8 +16,8 @@
     </select>
   </app-admin-toolbar>
 
-  @if (errorMessage()) {
-  <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  @if (pageErrorMessage()) {
+  <div class="alert alert-danger border-0 shadow-sm">{{ pageErrorMessage() }}</div>
   }
 
   <app-admin-table [columns]="columns" [rows]="pagedAuthors" [loading]="loading()" emptyIcon="bi bi-person-x"
@@ -29,8 +29,12 @@
         <td class="text-muted">{{ author.createdAt ? (author.createdAt | date:'medium') : '—' }}</td>
         <td class="text-end">
           <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-book-outline" (click)="openEdit(author)">Edit</button>
-            <button type="button" class="btn btn-outline-danger" (click)="openDelete(author)">Delete</button>
+            <button type="button" class="btn btn-book-outline" [disabled]="saving()" (click)="openEdit(author)">
+              Edit
+            </button>
+            <button type="button" class="btn btn-outline-danger" [disabled]="saving()" (click)="openDelete(author)">
+              Delete
+            </button>
           </div>
         </td>
       </tr>
@@ -39,22 +43,29 @@
 </section>
 
 <app-admin-form-modal [open]="formOpen()" [title]="editingId() ? 'Edit Author' : 'Create Author'" submitText="Save"
+  [submitText]="saving() ? 'Saving...' : 'Save'"
   [submitDisabled]="saving() || !draft().name.trim()" (submitted)="saveDraft()" (closed)="closeForm()">
+  @if (modalErrorMessage()) {
+    <div class="alert alert-danger border-0 shadow-sm">{{ modalErrorMessage() }}</div>
+  }
   <div class="row g-3">
     <div class="col-12 col-lg-6">
       <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Name</label>
-      <input class="form-control border-book" [ngModel]="draft().name"
+      <input class="form-control border-book" [disabled]="saving()" [ngModel]="draft().name"
         (ngModelChange)="draft.set({ ...draft(), name: $event })" name="authorName" />
     </div>
     <div class="col-12">
       <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Bio</label>
-      <textarea class="form-control border-book" rows="4" [ngModel]="draft().bio"
+      <textarea class="form-control border-book" rows="4" [disabled]="saving()" [ngModel]="draft().bio"
         (ngModelChange)="draft.set({ ...draft(), bio: $event })" name="authorBio"></textarea>
     </div>
   </div>
 </app-admin-form-modal>
 
 <app-admin-confirm-modal [open]="deleteOpen()" title="Delete author"
-  [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'" confirmText="Delete" [confirmDisabled]="saving()"
+  [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'"
+  [error]="modalErrorMessage()"
+  [confirmText]="saving() ? 'Deleting...' : 'Delete'"
+  [confirmDisabled]="saving()"
   (confirmed)="confirmDelete()" (closed)="closeDelete()">
 </app-admin-confirm-modal>
