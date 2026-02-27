@@ -13,11 +13,11 @@ export class AuthService {
   private readonly TOKEN_KEY = 'jwt_token';
 
   registerForm(data: object): Observable<any> {
-    return this.http.post(environment.apiUrl + '/register', data);
+    return this.http.post(environment.apiUrl + '/auth/register', data);
   }
 
   loginForm(data: object): Observable<any> {
-    return this.http.post<any>(environment.apiUrl + '/login', data).pipe(
+    return this.http.post<any>(environment.apiUrl + '/auth/login', data).pipe(
       tap(res => {
         if (res.data?.token) {
           localStorage.setItem(this.TOKEN_KEY, res.data.token);
