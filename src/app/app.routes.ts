@@ -1,5 +1,8 @@
 import { Routes } from '@angular/router';
 import { NotFound } from './not-found/not-found';
+import { authGuard } from '../app/features/auth/guard/auth-guard';
+import { isLoggedGuard } from '../app/features/auth/guard/is-logged-guard';
+import { adminGuard } from '../app/features/auth/guard/admin-guard';
 
 export const routes: Routes = [
   {
@@ -9,6 +12,7 @@ export const routes: Routes = [
   },
   {
     path: 'auth',
+    canActivate: [isLoggedGuard],
     children: [
       {
         path: 'login',
@@ -49,10 +53,12 @@ export const routes: Routes = [
   },
   {
     path: 'cart',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/cart/cart').then((c) => c.Cart),
   },
   {
     path: 'orders',
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -67,10 +73,12 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
+    canActivate: [authGuard],
     loadComponent: () => import('./features/profile/profile').then((c) => c.Profile),
   },
   {
     path: 'admin',
+    canActivate: [authGuard, adminGuard],
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
   },
   {

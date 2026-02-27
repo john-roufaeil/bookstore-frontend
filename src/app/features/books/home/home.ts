@@ -5,13 +5,14 @@ import { BookCard } from '../../../shared/components/book-card/book-card';
 import { AuthorCard } from '../../../shared/components/author-card/author-card';
 import { BookService } from '../../../core/services/book.service';
 import { AuthorService } from '../../../core/services/author.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [CommonModule, RouterLink, BookCard, AuthorCard],
   templateUrl: './home.html',
-  styleUrl: './home.css'
+  styleUrl: './home.css',
 })
 export class Home implements OnInit {
   popularBooks = signal<any[]>([]);
@@ -20,7 +21,8 @@ export class Home implements OnInit {
 
   constructor(
     private bookService: BookService,
-    private authorService: AuthorService
+    private authorService: AuthorService,
+    private cartService: CartService,
   ) { }
 
   ngOnInit(): void {
@@ -37,7 +39,7 @@ export class Home implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-      }
+      },
     });
 
     this.authorService.getAuthors({ limit: 4 }).subscribe({
@@ -52,6 +54,6 @@ export class Home implements OnInit {
   }
 
   onAddToCart(book: any): void {
-    alert(`Added "${book.name}" to cart!`);
+    this.cartService.addToCart(book._id);
   }
 }

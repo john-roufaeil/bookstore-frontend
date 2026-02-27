@@ -22,7 +22,7 @@
 
 .admin-nav-link.active {
   background: rgba(111, 66, 193, 0.12);
-  color: var(--book-primary, #6f42c1);
+  color: #b8860b;
 }
 
 .admin-main {

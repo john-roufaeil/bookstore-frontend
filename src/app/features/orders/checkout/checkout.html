@@ -1,1 +1,161 @@
-<p>checkout works!</p>
+<div class="container py-5 fade-in">
+  <div class="row g-4">
+    <!-- Left Column: Shipping Form -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+        <h2 class="font-serif fw-bold mb-4">Shipping Information</h2>
+
+        <form [formGroup]="shippingForm" (ngSubmit)="onSubmit()">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-medium small text-muted">Full Name</label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3"
+                formControlName="fullName"
+                [class.is-invalid]="
+                  shippingForm.get('fullName')?.invalid && shippingForm.get('fullName')?.touched
+                "
+                placeholder="John Doe"
+              />
+              <div class="invalid-feedback">Please enter a valid full name.</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-medium small text-muted">Shipping Address</label>
+              <textarea
+                class="form-control form-control-lg rounded-3"
+                rows="3"
+                formControlName="address"
+                [class.is-invalid]="
+                  shippingForm.get('address')?.invalid && shippingForm.get('address')?.touched
+                "
+                placeholder="House No, Street, Landmark"
+              ></textarea>
+              <div class="invalid-feedback">Address must be at least 10 characters long.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium small text-muted">City</label>
+              <input
+                type="text"
+                class="form-control form-control-lg rounded-3"
+                formControlName="city"
+                [class.is-invalid]="
+                  shippingForm.get('city')?.invalid && shippingForm.get('city')?.touched
+                "
+                placeholder="Cairo"
+              />
+              <div class="invalid-feedback">City is required.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-medium small text-muted">Phone Number</label>
+              <input
+                type="tel"
+                class="form-control form-control-lg rounded-3"
+                formControlName="phone"
+                [class.is-invalid]="
+                  shippingForm.get('phone')?.invalid && shippingForm.get('phone')?.touched
+                "
+                placeholder="+20 123 4567 890"
+              />
+              <div class="invalid-feedback">Please enter a valid phone number.</div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-top">
+            <div class="d-flex align-items-center mb-4 text-muted small">
+              <i class="fa-solid fa-truck-fast me-2"></i>
+              <span>Cash on Delivery only (Standard delivery 2-4 business days)</span>
+            </div>
+
+            @if (errorMessage()) {
+              <div class="alert alert-danger rounded-3 py-2 px-3 mb-3 small">
+                <i class="fa-solid fa-circle-exclamation me-1"></i>{{ errorMessage() }}
+              </div>
+            }
+
+            <button
+              type="submit"
+              class="btn btn-book-primary w-100 py-3 rounded-pill fw-bold shadow-sm d-flex align-items-center justify-content-center"
+              [disabled]="shippingForm.invalid || isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Processing Order...
+              } @else {
+                <i class="fa-solid fa-lock me-2"></i>Place Order ({{ cartTotal() | currency }})
+              }
+            </button>
+            <a
+              routerLink="/cart"
+              class="btn btn-link link-secondary w-100 mt-3 small text-decoration-none"
+            >
+              <i class="fa-solid fa-arrow-left me-1"></i>Back to Cart
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Summary -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 100px">
+        <h5 class="fw-bold mb-4 font-serif">Order Summary</h5>
+
+        <div class="order-items-scroll pe-2 mb-4" style="max-height: 300px; overflow-y: auto">
+          @for (item of cartItems(); track item.book._id) {
+            <div class="d-flex align-items-center mb-3">
+              <div class="position-relative">
+                <img
+                  [src]="item.book.coverImage"
+                  [alt]="item.book.name"
+                  class="rounded-2 border"
+                  style="width: 50px; height: 75px; object-fit: cover"
+                />
+                <span
+                  class="position-absolute translate-middle badge rounded-pill bg-book-primary"
+                  style="top: 0; left: 100%; font-size: 10px"
+                  >{{ item.quantity }}</span
+                >
+              </div>
+              <div class="ms-3 overflow-hidden">
+                <h6 class="mb-0 text-truncate fw-medium" style="font-size: 14px">
+                  {{ item.book.name }}
+                </h6>
+                <small class="text-muted">{{ item.book.price | currency }}</small>
+              </div>
+              <div class="ms-auto fw-medium small">
+                {{ item.book.price * item.quantity | currency }}
+              </div>
+            </div>
+          }
+        </div>
+
+        <hr class="my-4 opacity-50" />
+
+        <div class="d-flex justify-content-between mb-2 text-muted small">
+          <span>Subtotal</span>
+          <span>{{ cartTotal() | currency }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-3 text-muted small">
+          <span>Shipping</span>
+          <span class="text-success fw-medium">Free</span>
+        </div>
+
+        <div class="d-flex justify-content-between mb-0 pt-3 border-top">
+          <h5 class="fw-bold mb-0">Total</h5>
+          <h5 class="fw-bold mb-0 text-brown">{{ cartTotal() | currency }}</h5>
+        </div>
+
+        <div class="mt-4 p-3 bg-light rounded-3 small text-muted">
+          <p class="mb-1 fw-bold text-dark">
+            <i class="fa-solid fa-circle-info me-1"></i> Refund Policy
+          </p>
+          We offer a 7-day return policy for unused items in original packaging.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
