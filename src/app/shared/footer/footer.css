@@ -1,27 +1,15 @@
 .footer-book {
-  background-color: var(--book-primary);
+  background-color: var(--book-nav-bg);
   transition: background-color 0.3s ease;
-}
-
-body.dark .footer-book {
-  background-color: #1a1a1a;
 }
 
 .footer-logo {
   color: #ffffff;
 }
 
-body.dark .footer-logo {
-  color: var(--book-text);
-}
-
 .footer-desc {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.6;
-}
-
-body.dark .footer-desc {
-  color: rgba(245, 240, 232, 0.5);
 }
 
 .footer-heading {
@@ -30,7 +18,7 @@ body.dark .footer-desc {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--book-accent);
+  color: #d4a853;
   margin-bottom: 16px;
 }
 
@@ -45,31 +33,23 @@ body.dark .footer-desc {
 }
 
 .footer-links a {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
   font-size: 13px;
   transition: color 0.15s;
 }
 
 .footer-links a:hover {
-  color: var(--book-accent);
-}
-
-body.dark .footer-links a {
-  color: rgba(245, 240, 232, 0.5);
-}
-
-body.dark .footer-links a:hover {
-  color: var(--book-accent);
+  color: #d4a853;
 }
 
 .footer-social {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,26 +59,14 @@ body.dark .footer-links a:hover {
 }
 
 .footer-social:hover {
-  background: var(--book-accent);
+  background: #d4a853;
   color: #1a120b;
 }
 
-body.dark .footer-social {
-  color: rgba(245, 240, 232, 0.6);
-}
-
 .footer-divider {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-body.dark .footer-divider {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .footer-copy {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-body.dark .footer-copy {
-  color: rgba(245, 240, 232, 0.35);
+  color: rgba(255, 255, 255, 0.5);
 }

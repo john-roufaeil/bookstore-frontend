@@ -1,101 +1,106 @@
-<div
-  class="d-flex align-items-center justify-content-center fade-in"
-  style="min-height: calc(100vh - 60px); background: var(--book-bg)"
->
+<div class="d-flex fade-in" style="min-height: calc(100vh - 60px)">
   <div
-    class="border-book rounded-4 p-4 p-md-5 shadow-sm bg-book-surface"
-    style="width: 100%; min-width: 400px; max-width: 40vw"
+    class="d-none d-lg-block col-lg-5 position-relative overflow-hidden"
+    style="background: url('/images/auth-reading.png') center/cover no-repeat"
   >
-    <!-- Header -->
-    <h3 class="font-serif fw-bold mb-1">Welcome back</h3>
-    <p class="text-muted font-mono small mb-4">Sign in to your account to continue</p>
+    <div
+      class="position-absolute top-0 start-0 w-100 h-100"
+      style="background: rgba(26, 18, 11, 0.6)"
+    ></div>
+  </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="submitLogin()">
-      <!-- Email Field -->
-      <div class="form-floating mb-3">
-        <input
-          class="form-control border-book"
-          type="email"
-          id="emailInput"
-          formControlName="email"
-          placeholder="you&#64;example.com"
-        />
-        <label for="emailInput" class="text-muted font-mono">Email</label>
-        @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
-          <small class="text-danger font-mono mt-1 d-block">
-            @if (loginForm.get('email')?.hasError('required')) {
-              Email is required
-            } @else {
-              Please enter a valid email
-            }
-          </small>
-        }
-      </div>
+  <div
+    class="col-12 col-lg-7 d-flex align-items-center justify-content-center p-4"
+    style="background: var(--book-bg)"
+  >
+    <div class="w-100" style="max-width: 440px">
+      <h3 class="font-serif fw-bold mb-1">Welcome back</h3>
+      <p class="text-muted font-mono small mb-4">Sign in to your account to continue</p>
 
-      <!-- Password Field -->
-      <div class="form-floating mb-3 position-relative">
-        <input
-          class="form-control border-book pe-5"
-          [type]="showPassword ? 'text' : 'password'"
-          id="passwordInput"
-          formControlName="password"
-          placeholder="••••••••"
-          (copy)="$event.preventDefault()"
-          (paste)="$event.preventDefault()"
-        />
-        <label for="passwordInput" class="text-muted font-mono">Password</label>
-        <span
-          class="password-toggle"
-          (click)="showPassword = !showPassword"
-          role="button"
-          [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-        >
-          <i
-            class="fa-solid"
-            [class.fa-eye]="!showPassword"
-            [class.fa-eye-slash]="showPassword"
-          ></i>
-        </span>
-        @if (
-          loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
-        ) {
-          <small class="text-danger font-mono mt-1 d-block">Password is required</small>
-        }
-      </div>
-
-      <!-- Server Error Display -->
-      @if (serverError()) {
-        <div
-          class="alert alert-danger d-flex align-items-center font-mono small mt-3 mb-0 rounded-3"
-          role="alert"
-        >
-          <i class="fa-solid fa-circle-exclamation me-2"></i>
-          {{ serverError() }}
+      <form [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <div class="form-floating mb-3">
+          <input
+            class="form-control border-book"
+            type="email"
+            id="emailInput"
+            formControlName="email"
+            placeholder="you&#64;example.com"
+          />
+          <label for="emailInput" class="text-muted font-mono">Email</label>
+          @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
+            <small class="text-danger font-mono mt-1 d-block">
+              @if (loginForm.get('email')?.hasError('required')) {
+                Email is required
+              } @else {
+                Please enter a valid email
+              }
+            </small>
+          }
         </div>
-      }
 
-      <button
-        class="btn btn-book-accent btn-login-submit w-100 fw-bold font-mono py-3 mt-4 rounded-3 shadow-sm text-uppercase d-flex align-items-center justify-content-center"
-        type="submit"
-        [disabled]="loginForm.invalid || isLoading()"
-      >
-        @if (isLoading()) {
-          <i class="fa-solid fa-spinner fa-spin me-2"></i>
-        } @else {
-          <i class="fa-solid fa-right-to-bracket me-2"></i>
-          Sign In
+        <div class="form-floating mb-3 position-relative">
+          <input
+            class="form-control border-book pe-5"
+            [type]="showPassword ? 'text' : 'password'"
+            id="passwordInput"
+            formControlName="password"
+            placeholder="••••••••"
+            (copy)="$event.preventDefault()"
+            (paste)="$event.preventDefault()"
+          />
+          <label for="passwordInput" class="text-muted font-mono">Password</label>
+          <span
+            class="password-toggle"
+            (click)="showPassword = !showPassword"
+            role="button"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <i
+              class="fa-solid"
+              [class.fa-eye]="!showPassword"
+              [class.fa-eye-slash]="showPassword"
+            ></i>
+          </span>
+          @if (
+            loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')
+          ) {
+            <small class="text-danger font-mono mt-1 d-block">Password is required</small>
+          }
+        </div>
+
+        @if (serverError()) {
+          <div
+            class="alert alert-danger d-flex align-items-center font-mono small mt-3 mb-0 rounded-3"
+            role="alert"
+          >
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            {{ serverError() }}
+          </div>
         }
-      </button>
-    </form>
 
-    <div class="text-center mt-3 small text-muted">
-      Don't have an account?
-      <a
-        routerLink="/auth/register"
-        class="fw-bold text-decoration-underline"
-        style="color: var(--book-primary)"
-        >Register</a
-      >
+        <button
+          class="btn btn-book-accent btn-login-submit w-100 fw-bold font-mono py-3 mt-4 rounded-3 shadow-sm text-uppercase d-flex align-items-center justify-content-center"
+          type="submit"
+          [disabled]="loginForm.invalid || isLoading()"
+        >
+          @if (isLoading()) {
+            <i class="fa-solid fa-spinner fa-spin me-2"></i>
+          } @else {
+            <i class="fa-solid fa-right-to-bracket me-2"></i>
+            Sign In
+          }
+        </button>
+      </form>
+
+      <div class="text-center mt-3 small text-muted">
+        Don't have an account?
+        <a
+          routerLink="/auth/register"
+          class="fw-bold text-decoration-underline"
+          style="color: var(--book-primary)"
+          >Register</a
+        >
+      </div>
     </div>
   </div>
 </div>

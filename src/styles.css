@@ -20,9 +20,9 @@
 
 /* ── Dark Mode ── */
 body.dark {
-  --book-primary: #D4A853;
-  --book-secondary: #8B5E3C;
-  --book-accent: #8B5E3C;
+  --book-primary: #d4a853;
+  --book-secondary: #8b5e3c;
+  --book-accent: #8b5e3c;
   --book-bg: #111111;
   --book-surface: #1a1a1a;
   --book-card: #222222;
@@ -40,26 +40,45 @@ body {
   font-family: 'Inter', sans-serif;
   background-color: var(--book-bg);
   color: var(--book-text);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* ── Dark Mode: Bootstrap & Form Overrides ── */
 body.dark .form-control {
-  background-color: var(--book-input-bg);
+  background-color: var(--book-input-bg) !important;
   border-color: var(--book-border);
-  color: var(--book-text);
+  color: var(--book-text) !important;
 }
 body.dark .form-control:focus {
-  background-color: var(--book-input-bg);
+  background-color: var(--book-input-bg) !important;
   border-color: var(--book-accent);
-  color: var(--book-text);
+  color: var(--book-text) !important;
   box-shadow: 0 0 0 0.2rem rgba(139, 94, 60, 0.25);
 }
 body.dark .form-control::placeholder {
   color: var(--book-muted);
 }
+
+/* Browser autofill override for dark mode */
+body.dark .form-control:-webkit-autofill,
+body.dark .form-control:-webkit-autofill:hover,
+body.dark .form-control:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--book-input-bg) inset !important;
+  -webkit-text-fill-color: var(--book-text) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Keep Bootstrap floating-label placeholder transparent so label doesn't overlap */
+body.dark .form-floating > .form-control::placeholder {
+  color: transparent !important;
+}
 body.dark .form-floating > label {
   color: var(--book-muted);
+}
+.form-floating > .form-control::placeholder {
+  color: transparent !important;
 }
 body.dark .card,
 body.dark .bg-book-surface {
@@ -254,7 +273,9 @@ body.dark .shadow-sm {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, transform 0.2s;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 .theme-toggle:hover {
   background: rgba(255, 255, 255, 0.2);
@@ -292,15 +313,24 @@ body.dark .shadow-sm {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--book-border) 25%, var(--book-surface) 50%, var(--book-border) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--book-border) 25%,
+    var(--book-surface) 50%,
+    var(--book-border) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .skeleton-text {
