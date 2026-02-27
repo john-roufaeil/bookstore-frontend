@@ -21,6 +21,7 @@ type SortType = 'createdAt:desc' | 'createdAt:asc' | '';
 })
 export class AdminCategories implements OnInit {
   loading = signal(true);
+  saving = signal(false);
   errorMessage = signal('');
 
   search = '';
@@ -133,18 +134,28 @@ export class AdminCategories implements OnInit {
     if (!name) return;
 
     const id = this.editingId();
-    if (id) {
-      this.categories.set(this.categories().map((c) => (c?._id === id ? { ...c, name } : c)));
-    } else {
-      const newCategory = {
-        _id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : String(Date.now()),
-        name,
-        createdAt: new Date().toISOString(),
-      };
-      this.categories.set([newCategory, ...this.categories()]);
-    }
+    this.saving.set(true);
+    this.errorMessage.set('');
 
-    this.formOpen.set(false);
+    const body = { name };
+    const req = id
+      ? this.http.patch<any>(`${environment.apiUrl}/categories/${id}`, body)
+      : this.http.post<any>(`${environment.apiUrl}/categories`, body);
+
+    req
+      .pipe(
+        timeout(15000),
+        finalize(() => this.saving.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.formOpen.set(false);
+          this.fetchCategories();
+        },
+        error: () => {
+          this.errorMessage.set(id ? 'Failed to update category.' : 'Failed to create category.');
+        },
+      });
   }
 
   openDelete(category: Category): void {
@@ -160,7 +171,21 @@ export class AdminCategories implements OnInit {
   confirmDelete(): void {
     const selected = this.selectedForDelete();
     if (!selected?._id) return;
-    this.categories.set(this.categories().filter((c) => c?._id !== selected._id));
-    this.closeDelete();
+
+    this.saving.set(true);
+    this.errorMessage.set('');
+
+    this.http
+      .delete<any>(`${environment.apiUrl}/categories/${selected._id}`)
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: () => {
+          this.closeDelete();
+          this.fetchCategories();
+        },
+        error: () => {
+          this.errorMessage.set('Failed to delete category.');
+        },
+      });
   }
 }

@@ -43,8 +43,12 @@
         <td class="text-muted">{{ category.createdAt ? (category.createdAt | date:'medium') : '—' }}</td>
         <td class="text-end">
           <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-book-outline" (click)="openEdit(category)">Edit</button>
-            <button type="button" class="btn btn-outline-danger" (click)="openDelete(category)">Delete</button>
+            <button type="button" class="btn btn-book-outline" [disabled]="saving()" (click)="openEdit(category)">
+              Edit
+            </button>
+            <button type="button" class="btn btn-outline-danger" [disabled]="saving()" (click)="openDelete(category)">
+              Delete
+            </button>
           </div>
         </td>
       </tr>
@@ -55,14 +59,15 @@
 <app-admin-form-modal
   [open]="formOpen()"
   [title]="editingId() ? 'Edit Category' : 'Create Category'"
-  submitText="Save"
-  [submitDisabled]="!draftName().trim()"
+  [submitText]="saving() ? 'Saving...' : 'Save'"
+  [submitDisabled]="saving() || !draftName().trim()"
   (submitted)="saveDraft()"
   (closed)="closeForm()"
 >
   <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Name</label>
   <input
     class="form-control border-book"
+    [disabled]="saving()"
     [ngModel]="draftName()"
     (ngModelChange)="draftName.set($event)"
     name="categoryName"
@@ -73,7 +78,8 @@
   [open]="deleteOpen()"
   title="Delete category"
   [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'"
-  confirmText="Delete"
+  [confirmText]="saving() ? 'Deleting...' : 'Delete'"
+  [confirmDisabled]="saving()"
   (confirmed)="confirmDelete()"
   (closed)="closeDelete()"
 ></app-admin-confirm-modal>
