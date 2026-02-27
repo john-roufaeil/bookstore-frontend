@@ -26,7 +26,7 @@ export class AdminCategories implements OnInit {
   search = '';
   sort: SortType = '';
 
-  page = 1;
+  page = signal(1);
   pageSize = 10;
 
   categories = signal<Category[]>([]);
@@ -52,7 +52,6 @@ export class AdminCategories implements OnInit {
   fetchCategories(): void {
     this.loading.set(true);
     this.errorMessage.set('');
-
     this.http
       .get<any>(`${environment.apiUrl}/categories`)
       .pipe(
@@ -61,8 +60,7 @@ export class AdminCategories implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          const categories = res.data ? res.data : [];
-          this.categories.set(categories);
+          this.categories.set((res.data) ? res.data : []);
         },
         error: () => {
           this.errorMessage.set('Failed to load categories.');
@@ -72,16 +70,16 @@ export class AdminCategories implements OnInit {
 
   onSearchChange(value: string): void {
     this.search = value;
-    this.page = 1;
+    this.page.set(1);
   }
 
   onSortChange(value: SortType): void {
     this.sort = value;
-    this.page = 1;
+    this.page.set(1);
   }
 
   onPageChange(page: number): void {
-    this.page = page;
+    this.page.set(page);
   }
 
   get filteredCategories(): Category[] {
@@ -110,7 +108,7 @@ export class AdminCategories implements OnInit {
   }
 
   get pagedCategories(): Category[] {
-    const start = (this.page - 1) * this.pageSize;
+    const start = (this.page() - 1) * this.pageSize;
     return this.filteredCategories.slice(start, start + this.pageSize);
   }
 

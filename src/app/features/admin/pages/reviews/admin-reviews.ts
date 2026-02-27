@@ -6,10 +6,10 @@ import { environment } from '../../../../../environments/environment';
 import { AdminToolbar } from '../../../../shared/components/admin-toolbar/admin-toolbar';
 import { StarRating } from '../../../../shared/components/star-rating/star-rating';
 import { finalize, timeout } from 'rxjs/operators';
-import { AdminFormModal } from '../../../../shared/components/admin-form-modal/admin-form-modal';
+import { AdminModal } from '../../../../shared/components/admin-modal/admin-modal';
 import { AdminConfirmModal } from '../../../../shared/components/admin-confirm-modal/admin-confirm-modal';
 import { AdminTable, AdminTableColumn } from '../../../../shared/components/admin-table/admin-table';
-import { Book, Review } from '../../../../core/models';
+import { Review } from '../../../../core/models';
 
 type SortType = 'createdAt:desc' | 'createdAt:asc' | 'rating:desc' | 'rating:asc' | '';
 
@@ -22,7 +22,7 @@ type SortType = 'createdAt:desc' | 'createdAt:asc' | 'rating:desc' | 'rating:asc
     AdminToolbar,
     AdminTable,
     StarRating,
-    AdminFormModal,
+    AdminModal,
     AdminConfirmModal,
   ],
   templateUrl: './admin-reviews.html',
@@ -32,112 +32,67 @@ export class AdminReviews implements OnInit {
   loading = signal(true);
   errorMessage = signal('');
 
-  booksLoading = signal(true);
-  selectedBookId = signal('');
-  books = signal<Book[]>([]);
   reviews = signal<Review[]>([]);
 
+  selectedBookId = signal('');
   minRating: number | '' = '';
   sort: SortType = 'createdAt:desc';
   page = 1;
   pageSize = 10;
 
   columns: AdminTableColumn[] = [
+    { label: 'Book', width: '240px' },
     { label: 'Rating', width: '140px' },
     { label: 'Comment' },
     { label: 'User', width: '220px' },
     { label: 'Created', width: '190px' },
-    { label: 'Actions', width: '160px', align: 'end' },
+    { label: 'Actions', width: '170px', align: 'end' },
   ];
 
-  formOpen = signal(false);
+  viewOpen = signal(false);
+  selectedReview = signal<Review | null>(null);
   deleteOpen = signal(false);
-  editingId = signal<string | null>(null);
   selectedForDelete = signal<Review | null>(null);
-  draft = signal<{ rating: number; comment: string }>({ rating: 5, comment: '' });
 
   constructor(private http: HttpClient) { }
 
-  ngOnInit(): void {
-    this.fetchBooks();
-  }
-
-  fetchBooks(): void {
-    this.booksLoading.set(true);
-    this.errorMessage.set('');
-
-    this.http
-      .get<any>(`${environment.apiUrl}/books`)
-      .pipe(
-        timeout(15000),
-        finalize(() => this.booksLoading.set(false))
-      )
-      .subscribe({
-        next: (res) => {
-          const books = res.data.books ? res.data.books : [];
-          this.books.set(books);
-        },
-        error: () => {
-          this.errorMessage.set('Failed to load books.');
-          this.loading.set(false);
-          this.books.set([]);
-        },
-      });
-  }
-
   fetchReviews(): void {
-    const bookId = this.selectedBookId();
-    if (!bookId) {
-      this.reviews.set([]);
-      this.loading.set(false);
-      return;
-    }
-
     this.loading.set(true);
     this.errorMessage.set('');
-
     this.http
-      .get<any>(`${environment.apiUrl}/books/${bookId}/reviews`)
+      .get<any>(`${environment.apiUrl}/reviews`)
       .pipe(
         timeout(15000),
         finalize(() => this.loading.set(false))
       )
       .subscribe({
         next: (res) => {
-          const reviews = res.data.reviews ? res.data.reviews : [];
-          this.reviews.set(reviews);
+          this.reviews.set(res.data.reviews ? res.data.reviews : []);
         },
         error: () => {
+          this.reviews.set([]);
           this.errorMessage.set('Failed to load reviews.');
-        },
+        }
       });
+  }
+
+  ngOnInit(): void {
+    this.fetchReviews();
   }
 
   onBookChange(bookId: string): void {
     this.selectedBookId.set(bookId);
     this.page = 1;
-    this.fetchReviews();
   }
 
-  openEdit(review: Review): void {
-    this.editingId.set(review?._id ?? null);
-    this.draft.set({ rating: Number(review?.rating) || 0, comment: String(review?.comment ?? '') });
-    this.formOpen.set(true);
+  openView(review: Review): void {
+    this.selectedReview.set(review);
+    this.viewOpen.set(true);
   }
 
-  closeForm(): void {
-    this.formOpen.set(false);
-  }
-
-  saveDraft(): void {
-    const rating = Math.max(1, Math.min(5, Number(this.draft().rating) || 1));
-    const comment = this.draft().comment;
-
-    const id = this.editingId();
-    if (id) {
-      this.reviews.set(this.reviews().map((r) => (r?._id === id ? { ...r, rating, comment } : r)));
-    }
-    this.formOpen.set(false);
+  closeView(): void {
+    this.viewOpen.set(false);
+    this.selectedReview.set(null);
   }
 
   openDelete(review: any): void {
@@ -170,8 +125,23 @@ export class AdminReviews implements OnInit {
     this.page = page;
   }
 
+  get bookOptions(): Array<{ id: string; name: string }> {
+    const map = new Map<string, string>();
+    for (const r of this.reviews() || []) {
+      const id = r.book?._id;
+      const name = r.book?.name ?? '—';
+      if (id && !map.has(id)) map.set(id, name);
+    }
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }
+
   get filteredReviews(): any[] {
     let items = [...(this.reviews() || [])];
+
+    const bookId = this.selectedBookId();
+    if (bookId) {
+      items = items.filter((r) => r.book?._id === bookId);
+    }
 
     if (this.minRating !== '') {
       items = items.filter((r) => Number(r?.rating) >= Number(this.minRating));

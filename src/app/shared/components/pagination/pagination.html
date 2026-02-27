@@ -9,12 +9,14 @@
             </button>
         </li>
 
-        @for (page of pages(); track page) {
-        <li class="page-item" [class.active]="page === currentPage()">
+        @for (page of pages(); track $index) {
+        <li class="page-item" [class.active]="page === currentPage()" [class.disabled]="page === '…'">
             <button
                 class="page-link rounded-pill border-0 shadow-sm d-flex align-items-center justify-content-center mx-1 fw-black small"
                 [class.bg-warning]="page === currentPage()" [class.text-dark]="page === currentPage()"
-                style="width: 34px; height: 34px; font-size: 0.75rem;" (click)="onPageChange(page)">
+                style="width: 34px; height: 34px; font-size: 0.75rem;"
+                [disabled]="page === '…'"
+                (click)="onPageTokenClick(page)">
                 {{ page }}
             </button>
         </li>

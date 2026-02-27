@@ -1,6 +1,5 @@
 <section class="container">
-  <app-admin-toolbar title="Orders" subtitle="Manage orders." [search]="search" searchPlaceholder="Search orders…"
-    (searchChange)="onSearchChange($event)" (refresh)="fetchOrders()">
+  <app-admin-toolbar title="Orders" subtitle="Manage orders." (refresh)="fetchOrders()" [showSearch]="false">
 
     <select class="form-select form-select-sm border-book" style="width: 190px;" [ngModel]="statusFilter"
       (ngModelChange)="statusFilter = $event; onFilterChange()">
@@ -36,10 +35,7 @@
       <tr>
         <td class="font-mono text-muted">#{{ (order._id || '').slice(-6) }}</td>
         <td class="text-brown fw-semibold">
-          {{
-          typeof order.user === 'string'
-          ? order.user
-          : (order.user?.email || ((order.user?.firstName || '') + ' ' + (order.user?.lastName || '')))
+          {{`${order.userId?.firstName ?? ''} ${order.userId?.lastName ?? ''}`.trim()
           }}
         </td>
         <td>{{ (order.items || []).length }}</td>

@@ -1,15 +1,11 @@
 <section class="container">
-  <app-admin-toolbar title="Reviews" subtitle="Select a book to view its reviews." [showSearch]="false"
+  <app-admin-toolbar title="Reviews" subtitle="View and delete reviews." [showSearch]="false"
     (refresh)="fetchReviews()">
     <select class="form-select form-select-sm border-book" style="width: 260px;" [ngModel]="selectedBookId()"
-      (ngModelChange)="onBookChange($event)" [disabled]="booksLoading()">
-      @if (booksLoading()) {
-      <option value="">Loading books…</option>
-      } @else {
-      <option value="">Select book…</option>
-      @for (book of books(); track book._id) {
-      <option [value]="book._id">{{ book.name }}</option>
-      }
+      (ngModelChange)="onBookChange($event)" [disabled]="loading()">
+      <option value="">All books</option>
+      @for (book of bookOptions; track book.id) {
+      <option [value]="book.id">{{ book.name }}</option>
       }
     </select>
 
@@ -36,62 +32,62 @@
   <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
   }
 
-  @if (!selectedBookId() && !booksLoading()) {
-  <div class="text-center py-5 text-muted">
-    Select a book to see its reviews.
-  </div>
-  } @else {
   <app-admin-table [columns]="columns" [rows]="pagedReviews" [loading]="loading()" emptyIcon="bi bi-chat-left-text"
     emptyText="No reviews found." [currentPage]="page" [totalPages]="totalPages" (pageChange)="onPageChange($event)">
     <ng-template let-review>
       <tr>
+        <td class="text-brown fw-semibold">{{ review.book?.name ?? '—'}}</td>
         <td>
           <app-star-rating [rating]="review.rating || 0" [readonly]="true"></app-star-rating>
           <span class="text-muted small ms-2">{{ review.rating }}/5</span>
         </td>
         <td class="text-muted">{{ review.comment || '—' }}</td>
         <td class="fw-semibold text-brown">
-          {{
-          typeof review.user === 'string'
-          ? review.user
-          : (review.user?.email || ((review.user?.firstName || '') + ' ' + (review.user?.lastName || '')))
-          }}
+          {{ `${review?.user?.firstName ?? ''} ${review?.user?.lastName ?? ''}`.trim() }}
         </td>
         <td class="text-muted">{{ review.createdAt ? (review.createdAt | date:'medium') : '—' }}</td>
         <td class="text-end">
           <div class="btn-group btn-group-sm" role="group">
-            <button type="button" class="btn btn-book-outline" (click)="openEdit(review)">Edit</button>
+            <button type="button" class="btn btn-book-outline" (click)="openView(review)">View</button>
             <button type="button" class="btn btn-outline-danger" (click)="openDelete(review)">Delete</button>
           </div>
         </td>
       </tr>
     </ng-template>
   </app-admin-table>
-  }
 </section>
 
-<app-admin-form-modal [open]="formOpen()" [title]="'Edit Review'" submitText="Save" (submitted)="saveDraft()"
-  (closed)="closeForm()">
+<app-admin-modal [open]="viewOpen()" title="Review details" (closed)="closeView()">
   <div class="row g-3">
-    <div class="col-12 col-lg-4">
-      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Rating</label>
-      <select class="form-select border-book" [ngModel]="draft().rating"
-        (ngModelChange)="draft.set({ ...draft(), rating: $event })" name="reviewRating">
-        <option [ngValue]="5">5</option>
-        <option [ngValue]="4">4</option>
-        <option [ngValue]="3">3</option>
-        <option [ngValue]="2">2</option>
-        <option [ngValue]="1">1</option>
-      </select>
+    <div class="col-12 col-lg-6">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Book</div>
+      <div class="text-brown fw-semibold">{{ selectedReview()?.book?.name ?? '—' }}</div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">User</div>
+      <div class="text-brown fw-semibold">
+        {{ `${selectedReview()?.user?.firstName ?? ''} ${selectedReview()?.user?.lastName ?? ''}`.trim() }}
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Rating</div>
+      <div class="d-flex align-items-center gap-2">
+        <app-star-rating [rating]="selectedReview()?.rating || 0" [readonly]="true"></app-star-rating>
+        <span class="text-muted small">{{ selectedReview()?.rating ?? '—' }}/5</span>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Created</div>
+      <div>{{ selectedReview()?.createdAt ? (selectedReview()?.createdAt | date:'medium') : '—' }}</div>
     </div>
 
     <div class="col-12">
-      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Comment</label>
-      <textarea class="form-control border-book" rows="4" [ngModel]="draft().comment"
-        (ngModelChange)="draft.set({ ...draft(), comment: $event })" name="reviewComment"></textarea>
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Comment</div>
+      <div class="text-muted">{{ selectedReview()?.comment || '—' }}</div>
     </div>
   </div>
-</app-admin-form-modal>
+</app-admin-modal>
 
 <app-admin-confirm-modal [open]="deleteOpen()" title="Delete review" message="Delete this review?" confirmText="Delete"
   (confirmed)="confirmDelete()" (closed)="closeDelete()"></app-admin-confirm-modal>

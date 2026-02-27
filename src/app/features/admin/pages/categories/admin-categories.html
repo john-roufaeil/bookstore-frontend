@@ -33,7 +33,7 @@
     [rows]="pagedCategories"
     [loading]="loading()"
     emptyText="No categories found."
-    [currentPage]="page"
+    [currentPage]="page()"
     [totalPages]="totalPages"
     (pageChange)="onPageChange($event)"
   >

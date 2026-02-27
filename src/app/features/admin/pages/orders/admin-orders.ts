@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { AdminToolbar } from '../../../../shared/components/admin-toolbar/admin-toolbar';
 import { AdminModal } from '../../../../shared/components/admin-modal/admin-modal';
@@ -9,6 +9,7 @@ import { finalize, timeout } from 'rxjs/operators';
 import { AdminFormModal } from '../../../../shared/components/admin-form-modal/admin-form-modal';
 import { AdminConfirmModal } from '../../../../shared/components/admin-confirm-modal/admin-confirm-modal';
 import { AdminTable, AdminTableColumn } from '../../../../shared/components/admin-table/admin-table';
+import { Order } from '../../../../core/models';
 
 type SortType = 'createdAt:desc' | 'createdAt:asc' | 'total:desc' | 'total:asc' | '';
 
@@ -31,7 +32,6 @@ export class AdminOrders implements OnInit {
   loading = signal(true);
   errorMessage = signal('');
 
-  search = '';
   statusFilter = '';
   paymentFilter = '';
   sort: SortType = 'createdAt:desc';
@@ -39,7 +39,7 @@ export class AdminOrders implements OnInit {
   page = 1;
   pageSize = 10;
 
-  orders = signal<any[]>([]);
+  orders = signal<Order[]>([]);
 
   columns: AdminTableColumn[] = [
     { label: 'Order', width: '120px' },
@@ -53,15 +53,15 @@ export class AdminOrders implements OnInit {
   ];
 
   viewOpen = false;
-  selectedOrder: any = null;
+  selectedOrder: Order | null = null;
 
   formOpen = signal(false);
   deleteOpen = signal(false);
   editingId = signal<string | null>(null);
-  selectedForDelete = signal<any | null>(null);
+  selectedForDelete = signal<Order | null>(null);
   draft = signal<{ status: string; paymentStatus: string }>({ status: 'processing', paymentStatus: 'pending' });
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.fetchOrders();
@@ -72,26 +72,21 @@ export class AdminOrders implements OnInit {
     this.errorMessage.set('');
 
     this.http
-      .get<any>(`${environment.apiUrl}/orders`)
+      .get<any>(`${environment.apiUrl}/orders?page=1&limit=200`, {
+      })
       .pipe(
         timeout(15000),
         finalize(() => this.loading.set(false))
       )
       .subscribe({
         next: (res) => {
-          const data = res?.data ?? res;
-          const raw = data?.orders ?? data?.items ?? data;
-          this.orders.set(Array.isArray(raw) ? raw : []);
+          this.orders.set(res.data.data ? res.data.data : []);
         },
-        error: () => {
+        error: (err) => {
+          this.orders.set([]);
           this.errorMessage.set('Failed to load orders.');
         },
       });
-  }
-
-  onSearchChange(value: string): void {
-    this.search = value;
-    this.page = 1;
   }
 
   onFilterChange(): void {
@@ -107,7 +102,7 @@ export class AdminOrders implements OnInit {
     this.page = page;
   }
 
-  openView(order: any): void {
+  openView(order: Order): void {
     this.selectedOrder = order;
     this.viewOpen = true;
   }
@@ -117,7 +112,7 @@ export class AdminOrders implements OnInit {
     this.selectedOrder = null;
   }
 
-  openEdit(order: any): void {
+  openEdit(order: Order): void {
     this.editingId.set(order?._id ?? null);
     this.draft.set({
       status: String(order?.status ?? 'processing'),
@@ -135,23 +130,20 @@ export class AdminOrders implements OnInit {
     const draft = this.draft();
 
     if (id) {
-      this.orders.set(this.orders().map((o) => (o?._id === id ? { ...o, ...draft } : o)));
-    } else {
-      const newOrder = {
-        _id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : String(Date.now()),
-        user: '—',
-        items: [],
-        status: draft.status,
-        paymentStatus: draft.paymentStatus,
-        createdAt: new Date().toISOString(),
-      };
-      this.orders.set([newOrder, ...this.orders()]);
+      this.orders.set(this.orders().map((o) =>
+        o?._id === id
+          ? {
+              ...o,
+              status: draft.status as Order['status'],
+              paymentStatus: draft.paymentStatus as Order['paymentStatus'],
+            }
+          : o
+      ));
     }
-
     this.formOpen.set(false);
   }
 
-  openDelete(order: any): void {
+  openDelete(order: Order): void {
     this.selectedForDelete.set(order);
     this.deleteOpen.set(true);
   }
@@ -168,7 +160,7 @@ export class AdminOrders implements OnInit {
     this.closeDelete();
   }
 
-  orderTotal(order: any): number {
+  orderTotal(order: Order): number {
     const items = Array.isArray(order?.items) ? order.items : [];
     return items.reduce((sum: number, item: any) => {
       return sum + (Number(item?.quantity) || 0) * (Number(item?.priceAtPurchase) || 0);
@@ -176,36 +168,16 @@ export class AdminOrders implements OnInit {
   }
 
   get filteredOrders(): any[] {
-    const query = this.search.trim().toLowerCase();
     let items = [...(this.orders() || [])];
 
-    if (query) {
-      items = items.filter((o) => {
-        const id = String(o?._id ?? '').toLowerCase();
-        const user = o?.user;
-        const userText =
-          typeof user === 'string'
-            ? user
-            : `${user?.email ?? ''} ${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
-        return id.includes(query) || userText.toLowerCase().includes(query);
-      });
-    }
-
-    if (this.statusFilter) {
-      items = items.filter((o) => String(o?.status ?? '') === this.statusFilter);
-    }
-
-    if (this.paymentFilter) {
-      items = items.filter((o) => String(o?.paymentStatus ?? '') === this.paymentFilter);
-    }
+    if (this.statusFilter) items = items.filter((o) => String(o?.status ?? '') === this.statusFilter);
+    if (this.paymentFilter) items = items.filter((o) => String(o?.paymentStatus ?? '') === this.paymentFilter);
 
     if (this.sort) {
       const [sortBy, sortOrder] = this.sort.split(':');
       const dir = sortOrder === 'desc' ? -1 : 1;
       items.sort((a, b) => {
-        if (sortBy === 'total') {
-          return (this.orderTotal(a) - this.orderTotal(b)) * dir;
-        }
+        if (sortBy === 'total') return (this.orderTotal(a) - this.orderTotal(b)) * dir;
         const at = new Date(a?.createdAt ?? 0).getTime();
         const bt = new Date(b?.createdAt ?? 0).getTime();
         return (at - bt) * dir;
@@ -219,8 +191,12 @@ export class AdminOrders implements OnInit {
     return Math.max(1, Math.ceil(this.filteredOrders.length / this.pageSize));
   }
 
-  get pagedOrders(): any[] {
+  get pagedOrders(): Order[] {
     const start = (this.page - 1) * this.pageSize;
     return this.filteredOrders.slice(start, start + this.pageSize);
+  }
+
+  get rows(): Order[] {
+    return this.pagedOrders;
   }
 }
