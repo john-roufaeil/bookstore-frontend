@@ -61,7 +61,7 @@ export class AdminCategories implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          const categories = res.data.categories ? res.data.categories: [];
+          const categories = res.data ? res.data : [];
           this.categories.set(categories);
         },
         error: () => {

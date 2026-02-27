@@ -1,15 +1,172 @@
 <section class="container">
-  <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-4">
-    <div>
-      <h1 class="font-serif fw-black text-brown mb-1">Users</h1>
-      <p class="text-muted small mb-0">Manage user accounts and roles.</p>
-    </div>
-  </div>
+  <app-admin-toolbar
+    title="Users"
+    subtitle="Manage users."
+    [search]="search"
+    searchPlaceholder="Search users…"
+    (searchChange)="onSearchChange($event)"
+    (refresh)="fetchUsers()"
+  >
+    <button type="button" class="btn btn-book-primary btn-sm" (click)="openCreate()">
+      <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>
+      Create
+    </button>
 
-  <div class="card border-0 shadow-sm rounded-4">
-    <div class="card-body p-4 text-muted">
-      Users admin page coming next.
-    </div>
-  </div>
+    <select
+      class="form-select form-select-sm border-book"
+      style="width: 160px;"
+      [ngModel]="roleFilter"
+      (ngModelChange)="roleFilter = $event; onFilterChange()"
+    >
+      <option value="">All roles</option>
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <select
+      class="form-select form-select-sm border-book"
+      style="width: 170px;"
+      [ngModel]="verifiedFilter"
+      (ngModelChange)="verifiedFilter = $event; onFilterChange()"
+    >
+      <option value="">All verification</option>
+      <option value="true">Verified</option>
+      <option value="false">Unverified</option>
+    </select>
+
+    <select
+      class="form-select form-select-sm border-book"
+      style="width: 190px;"
+      [ngModel]="sort"
+      (ngModelChange)="onSortChange($event)"
+    >
+      <option value="createdAt:desc">Newest</option>
+      <option value="createdAt:asc">Oldest</option>
+    </select>
+  </app-admin-toolbar>
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger border-0 shadow-sm">{{ errorMessage() }}</div>
+  }
+
+  <app-admin-table
+    [columns]="columns"
+    [rows]="pagedUsers"
+    [loading]="loading()"
+    emptyIcon="bi bi-people"
+    emptyText="No users found."
+    [currentPage]="page"
+    [totalPages]="totalPages"
+    (pageChange)="onPageChange($event)"
+  >
+    <ng-template let-user>
+      <tr>
+        <td class="fw-semibold text-brown">{{ displayName(user) }}</td>
+        <td class="text-muted">{{ user.email }}</td>
+        <td>
+          <span
+            class="badge rounded-pill"
+            [class.text-bg-dark]="user.role === 'admin'"
+            [class.text-bg-secondary]="user.role !== 'admin'"
+          >
+            {{ user.role }}
+          </span>
+        </td>
+        <td>
+          <span
+            class="badge rounded-pill"
+            [class.text-bg-success]="user.isVerified"
+            [class.text-bg-warning]="!user.isVerified"
+          >
+            {{ user.isVerified ? 'Verified' : 'Unverified' }}
+          </span>
+        </td>
+        <td class="text-muted">{{ user.createdAt ? (user.createdAt | date:'medium') : '—' }}</td>
+        <td class="text-end">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-book-outline" (click)="openEdit(user)">Edit</button>
+            <button type="button" class="btn btn-outline-danger" (click)="openDelete(user)">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </app-admin-table>
 </section>
 
+<app-admin-form-modal
+  [open]="formOpen()"
+  [title]="editingId() ? 'Edit User' : 'Create User'"
+  submitText="Save"
+  [submitDisabled]="!draft().email.trim()"
+  (submitted)="saveDraft()"
+  (closed)="closeForm()"
+>
+  <div class="row g-3">
+    <div class="col-12 col-lg-6">
+      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">First name</label>
+      <input
+        class="form-control border-book"
+        [ngModel]="draft().firstName"
+        (ngModelChange)="draft.set({ ...draft(), firstName: $event })"
+        name="userFirstName"
+      />
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Last name</label>
+      <input
+        class="form-control border-book"
+        [ngModel]="draft().lastName"
+        (ngModelChange)="draft.set({ ...draft(), lastName: $event })"
+        name="userLastName"
+      />
+    </div>
+
+    <div class="col-12">
+      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Email</label>
+      <input
+        class="form-control border-book"
+        type="email"
+        [ngModel]="draft().email"
+        (ngModelChange)="draft.set({ ...draft(), email: $event })"
+        name="userEmail"
+      />
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Role</label>
+      <select
+        class="form-select border-book"
+        [ngModel]="draft().role"
+        (ngModelChange)="draft.set({ ...draft(), role: $event })"
+        name="userRole"
+      >
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+
+    <div class="col-12 col-lg-6 d-flex align-items-end">
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          [ngModel]="draft().isVerified"
+          (ngModelChange)="draft.set({ ...draft(), isVerified: $event })"
+          name="userVerified"
+          id="userVerified"
+        />
+        <label class="form-check-label" for="userVerified">Verified</label>
+      </div>
+    </div>
+  </div>
+</app-admin-form-modal>
+
+<app-admin-confirm-modal
+  [open]="deleteOpen()"
+  title="Delete user"
+  [message]="'Delete ' + (displayName(selectedForDelete()) || '') + '?'"
+  confirmText="Delete"
+  (confirmed)="confirmDelete()"
+  (closed)="closeDelete()"
+></app-admin-confirm-modal>

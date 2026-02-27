@@ -1,126 +1,102 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Injector, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EMPTY } from 'rxjs';
-import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  finalize,
-  skip,
-  switchMap,
-  timeout,
-} from 'rxjs/operators';
-import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize, timeout } from 'rxjs/operators';
+
 import { AuthorService } from '../../../../core/services/author.service';
 import { BookService } from '../../../../core/services/book.service';
 import { CategoryService } from '../../../../core/services/category.service';
-import { UploadService } from '../../../../core/services/upload.service';
-import { DataTable } from '../../../../shared/components/data-table/data-table';
-import { Author, Book, Category } from '../../../../core/models';
+import { AdminConfirmModal } from '../../../../shared/components/admin-confirm-modal/admin-confirm-modal';
+import { AdminFormModal } from '../../../../shared/components/admin-form-modal/admin-form-modal';
+import { AdminToolbar } from '../../../../shared/components/admin-toolbar/admin-toolbar';
+import { AdminTable, AdminTableColumn } from '../../../../shared/components/admin-table/admin-table';
 
-type ModalType = 'create' | 'edit' | 'delete';
+type SortType = 'price:asc' | 'price:desc' | 'stock:asc' | 'stock:desc' | '';
 
 @Component({
   selector: 'app-admin-books',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DataTable],
+  imports: [CommonModule, FormsModule, AdminToolbar, AdminTable, AdminFormModal, AdminConfirmModal],
   templateUrl: './admin-books.html',
   styleUrl: './admin-books.css',
 })
 export class AdminBooks implements OnInit {
-  private fb = inject(FormBuilder);
-  private destroyRef = inject(DestroyRef);
-  private injector = inject(Injector);
-
   loading = signal(true);
-  saving = signal(false);
-  errorMessage = signal<string | null>(null);
-  coverPreviewUrl = signal<string | null>(null);
+  errorMessage = signal('');
 
-  private coverFile: File | null = null;
-  private coverObjectUrl: string | null = null;
+  search = '';
+  authorFilter = '';
+  categoryFilter = '';
+  sort: SortType = '';
 
-  search = signal('');
-  authorFilter = signal('');
-  categoryFilter = signal('');
-  sort = signal<'price:asc' | 'price:desc' | 'stock:asc' | 'stock:desc' | ''>('');
-  currentPage = signal(1);
-  totalPages = signal(1);
-  limit = signal(10);
+  page = 1;
+  pageSize = 10;
 
-  books = signal<Book[]>([]);
-  categories = signal<Category[]>([]);
-  authors = signal<Author[]>([]);
+  books = signal<any[]>([]);
+  authors = signal<any[]>([]);
+  categories = signal<any[]>([]);
 
-  modal = signal<ModalType | null>(null);
-  selectedBook = signal<Book | null>(null);
+  columns: AdminTableColumn[] = [
+    { label: 'Cover', width: '70px' },
+    { label: 'Name' },
+    { label: 'Price', width: '110px' },
+    { label: 'Stock', width: '110px' },
+    { label: 'Author', width: '200px' },
+    { label: 'Category', width: '200px' },
+    { label: 'Actions', width: '160px', align: 'end' },
+  ];
 
-  isFormModalOpen = computed(() => this.modal() === 'create' || this.modal() === 'edit');
+  formOpen = signal(false);
+  deleteOpen = signal(false);
+  editingId = signal<string | null>(null);
+  selectedForDelete = signal<any | null>(null);
 
-  bookForm = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(2)]],
-    price: [0, [Validators.required, Validators.min(0)]],
-    stock: [0, [Validators.required, Validators.min(0)]],
-    author: ['', [Validators.required]],
-    category: [''],
-    coverImage: [''],
+  coverObjectUrl: string | null = null;
+  coverPreview = signal<string | null>(null);
+
+  draft = signal<{
+    name: string;
+    price: number;
+    stock: number;
+    authorId: string;
+    categoryId: string;
+    coverImage: string;
+  }>({
+    name: '',
+    price: 0,
+    stock: 0,
+    authorId: '',
+    categoryId: '',
+    coverImage: '',
   });
 
   constructor(
     private bookService: BookService,
     private categoryService: CategoryService,
-    private authorService: AuthorService,
-    private uploadService: UploadService
-  ) { }
+    private authorService: AuthorService
+  ) {}
 
   ngOnInit(): void {
-    this.loadLookups();
-    this.bindInstantSearch();
-    this.loadBooks();
+    this.fetchLookups();
+    this.fetchBooks();
   }
 
-  private bindInstantSearch(): void {
-    toObservable(this.search, { injector: this.injector })
-      .pipe(skip(1), debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.currentPage.set(1);
-        this.loadBooks();
-      });
-  }
-
-  loadLookups(): void {
+  fetchLookups(): void {
     this.categoryService.getCategories().subscribe({
-      next: (data) => this.categories.set(data || []),
+      next: (data) => this.categories.set(Array.isArray(data) ? data : []),
     });
 
     this.authorService.getAuthors({ limit: 200 }).subscribe({
-      next: (data) => this.authors.set(data || []),
+      next: (data) => this.authors.set(Array.isArray(data) ? data : []),
     });
   }
 
-  loadBooks(): void {
+  fetchBooks(): void {
     this.loading.set(true);
-    this.errorMessage.set(null);
-
-    const params: any = {
-      page: this.currentPage(),
-      limit: this.limit(),
-    };
-    if (this.search().trim()) params.search = this.search().trim();
-    if (this.authorFilter()) params.author = this.authorFilter();
-    if (this.categoryFilter()) params.category = this.categoryFilter();
-
-    const sort = this.sort();
-    if (sort) {
-      const [sortBy, sortOrder] = sort.split(':');
-      params.sortBy = sortBy;
-      params.sortOrder = sortOrder;
-    }
+    this.errorMessage.set('');
 
     this.bookService
-      .getBooks(params)
+      .getBooks({ limit: 200 })
       .pipe(
         timeout(15000),
         finalize(() => this.loading.set(false))
@@ -128,8 +104,7 @@ export class AdminBooks implements OnInit {
       .subscribe({
         next: (data) => {
           const items = Array.isArray(data?.books) ? data.books : [];
-          this.books.set(this.applyClientSort(items));
-          this.totalPages.set(data?.totalPages || 1);
+          this.books.set(items);
         },
         error: () => {
           this.errorMessage.set('Failed to load books.');
@@ -137,196 +112,170 @@ export class AdminBooks implements OnInit {
       });
   }
 
-  private applyClientSort(items: any[]): any[] {
-    const sort = this.sort();
-    if (!sort) return items;
-
-    const sorted = [...items];
-    const [sortBy, sortOrder] = sort.split(':') as ['price' | 'stock', 'asc' | 'desc'];
-    const direction = sortOrder === 'desc' ? -1 : 1;
-
-    const value = (book: any): number => {
-      const raw = sortBy === 'price' ? book?.price : book?.stock;
-      const numeric = typeof raw === 'number' ? raw : Number(raw);
-      return Number.isFinite(numeric) ? numeric : 0;
-    };
-
-    sorted.sort((a, b) => (value(a) - value(b)) * direction);
-    return sorted;
-  }
-
-  onPageChange(page: number): void {
-    this.currentPage.set(page);
-    this.loadBooks();
-  }
-
-  onSearch(): void {
-    this.currentPage.set(1);
-    this.loadBooks();
-  }
-
-  clearSearch(): void {
-    this.search.set('');
+  onSearchChange(value: string): void {
+    this.search = value;
+    this.page = 1;
   }
 
   onFilterChange(): void {
-    this.currentPage.set(1);
-    this.loadBooks();
+    this.page = 1;
+  }
+
+  onPageChange(page: number): void {
+    this.page = page;
   }
 
   openCreate(): void {
-    this.errorMessage.set(null);
-    this.selectedBook.set(null);
-    this.setCoverFile(null);
-    this.bookForm.reset({
+    this.editingId.set(null);
+    this.setCoverPreview(null);
+    this.draft.set({
       name: '',
       price: 0,
       stock: 0,
-      author: '',
-      category: '',
+      authorId: '',
+      categoryId: '',
       coverImage: '',
     });
-    this.modal.set('create');
+    this.formOpen.set(true);
   }
 
   openEdit(book: any): void {
-    this.errorMessage.set(null);
-    this.selectedBook.set(book);
-
     const authorId = typeof book?.author === 'string' ? book.author : book?.author?._id;
     const categoryId = typeof book?.category === 'string' ? book.category : book?.category?._id;
 
-    this.bookForm.reset({
-      name: book?.name ?? '',
-      price: book?.price ?? 0,
-      stock: book?.stock ?? 0,
-      author: authorId ?? '',
-      category: categoryId ?? '',
-      coverImage: book?.coverImage ?? '',
+    this.editingId.set(book?._id ?? null);
+    this.setCoverPreview(book?.coverImage ?? null);
+    this.draft.set({
+      name: String(book?.name ?? ''),
+      price: Number(book?.price) || 0,
+      stock: Number(book?.stock) || 0,
+      authorId: String(authorId ?? ''),
+      categoryId: String(categoryId ?? ''),
+      coverImage: String(book?.coverImage ?? ''),
     });
-    this.setCoverFile(null, book?.coverImage ?? null);
+    this.formOpen.set(true);
+  }
 
-    this.modal.set('edit');
+  closeForm(): void {
+    this.formOpen.set(false);
+  }
+
+  saveDraft(): void {
+    const d = this.draft();
+    const name = d.name.trim();
+    if (!name) return;
+
+    const author = this.authors().find((a) => a?._id === d.authorId) ?? d.authorId;
+    const category =
+      this.categories().find((c) => c?._id === d.categoryId) ?? (d.categoryId ? d.categoryId : null);
+
+    const payload = {
+      name,
+      price: Number(d.price) || 0,
+      stock: Number(d.stock) || 0,
+      author,
+      category,
+      coverImage: this.coverPreview() ?? d.coverImage ?? '',
+      createdAt: new Date().toISOString(),
+    };
+
+    const id = this.editingId();
+    if (id) {
+      this.books.set(this.books().map((b) => (b?._id === id ? { ...b, ...payload } : b)));
+    } else {
+      const newBook = {
+        _id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : String(Date.now()),
+        ...payload,
+      };
+      this.books.set([newBook, ...this.books()]);
+    }
+
+    this.formOpen.set(false);
   }
 
   openDelete(book: any): void {
-    this.errorMessage.set(null);
-    this.selectedBook.set(book);
-    this.modal.set('delete');
+    this.selectedForDelete.set(book);
+    this.deleteOpen.set(true);
   }
 
-  closeModal(): void {
-    this.modal.set(null);
-    this.selectedBook.set(null);
-    this.saving.set(false);
-    this.setCoverFile(null);
+  closeDelete(): void {
+    this.deleteOpen.set(false);
+    this.selectedForDelete.set(null);
+  }
+
+  confirmDelete(): void {
+    const selected = this.selectedForDelete();
+    if (!selected?._id) return;
+    this.books.set(this.books().filter((b) => b?._id !== selected._id));
+    this.closeDelete();
   }
 
   onCoverFileChange(event: Event): void {
     const input = event.target as HTMLInputElement | null;
     const file = input?.files?.[0] ?? null;
-    this.setCoverFile(file);
+    if (!file) return;
+    this.setCoverPreview(URL.createObjectURL(file));
   }
 
-  private setCoverFile(file: File | null, previewUrl: string | null = null): void {
-    if (this.coverObjectUrl) {
-      URL.revokeObjectURL(this.coverObjectUrl);
-      this.coverObjectUrl = null;
-    }
-
-    this.coverFile = file;
-
-    if (file) {
-      this.coverObjectUrl = URL.createObjectURL(file);
-      this.coverPreviewUrl.set(this.coverObjectUrl);
-      return;
-    }
-
-    this.coverPreviewUrl.set(previewUrl);
-  }
-
-  saveBook(): void {
-    if (this.bookForm.invalid) {
-      this.bookForm.markAllAsTouched();
-      return;
-    }
-
-    this.saving.set(true);
-    this.errorMessage.set(null);
-
-    const payload: any = {
-      ...this.bookForm.getRawValue(),
-    };
-
-    const modal = this.modal();
-    const selected = this.selectedBook();
-
-    const save$ =
-      modal === 'edit' && selected?._id
-        ? this.bookService.updateBook(selected._id, payload)
-        : this.bookService.createBook(payload);
-
-    const request$ = this.coverFile
-      ? this.uploadService.uploadBookCover(this.coverFile).pipe(
-        catchError(() => {
-          this.saving.set(false);
-          this.errorMessage.set('Failed to upload cover image.');
-          return EMPTY;
-        }),
-        switchMap((upload) => {
-          payload.coverImage = upload.secureUrl;
-          payload.coverImagePublicId = upload.publicId;
-          return save$;
-        })
-      )
-      : save$;
-
-    request$.subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.closeModal();
-        this.loadBooks();
-      },
-      error: () => {
-        this.saving.set(false);
-        this.errorMessage.set(modal === 'edit' ? 'Failed to update book.' : 'Failed to create book.');
-      },
-    });
-  }
-
-  confirmDelete(): void {
-    const selected = this.selectedBook();
-    if (!selected?._id) return;
-
-    this.saving.set(true);
-    this.errorMessage.set(null);
-
-    this.bookService.deleteBook(selected._id).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.closeModal();
-        this.loadBooks();
-      },
-      error: () => {
-        this.saving.set(false);
-        this.errorMessage.set('Failed to delete book.');
-      },
-    });
-  }
-
-  trackById(_: number, item: any): string {
-    return item?._id;
+  private setCoverPreview(url: string | null): void {
+    if (this.coverObjectUrl) URL.revokeObjectURL(this.coverObjectUrl);
+    this.coverObjectUrl = url;
+    this.coverPreview.set(url);
   }
 
   displayAuthor(book: any): string {
     if (!book?.author) return '—';
-    if (typeof book.author === 'string') return '—';
+    if (typeof book.author === 'string') {
+      return this.authors().find((a) => a?._id === book.author)?.name ?? '—';
+    }
     return book.author?.name ?? '—';
   }
 
   displayCategory(book: any): string {
     if (!book?.category) return '—';
-    if (typeof book.category === 'string') return '—';
+    if (typeof book.category === 'string') {
+      return this.categories().find((c) => c?._id === book.category)?.name ?? '—';
+    }
     return book.category?.name ?? '—';
+  }
+
+  get filteredBooks(): any[] {
+    const query = this.search.trim().toLowerCase();
+    let items = [...(this.books() || [])];
+
+    if (query) items = items.filter((b) => String(b?.name ?? '').toLowerCase().includes(query));
+    if (this.authorFilter) {
+      items = items.filter((b) => {
+        const id = typeof b?.author === 'string' ? b.author : b?.author?._id;
+        return String(id ?? '') === this.authorFilter;
+      });
+    }
+    if (this.categoryFilter) {
+      items = items.filter((b) => {
+        const id = typeof b?.category === 'string' ? b.category : b?.category?._id;
+        return String(id ?? '') === this.categoryFilter;
+      });
+    }
+
+    if (this.sort) {
+      const [sortBy, sortOrder] = this.sort.split(':');
+      const dir = sortOrder === 'desc' ? -1 : 1;
+      items.sort((a, b) => {
+        const av = Number(a?.[sortBy]) || 0;
+        const bv = Number(b?.[sortBy]) || 0;
+        return (av - bv) * dir;
+      });
+    }
+
+    return items;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredBooks.length / this.pageSize));
+  }
+
+  get pagedBooks(): any[] {
+    const start = (this.page - 1) * this.pageSize;
+    return this.filteredBooks.slice(start, start + this.pageSize);
   }
 }
