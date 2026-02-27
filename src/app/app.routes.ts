@@ -5,9 +5,9 @@ import { isLoggedGuard } from '../app/features/auth/guard/is-logged-guard';
 import { adminGuard } from '../app/features/auth/guard/admin-guard';
 
 export const routes: Routes = [
-  
   {
     path: '',
+    pathMatch: 'full',
     loadComponent: () => import('./features/books/home/home').then(m => m.Home)
   },
   {
@@ -39,8 +39,17 @@ export const routes: Routes = [
   },
   {
     path: 'authors',
-    loadComponent: () =>
-      import('./features/authors/author-list/author-list').then((c) => c.AuthorList),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/authors/author-list/author-list').then((c) => c.AuthorList)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/authors/author-detail/author-detail').then((c) => c.AuthorDetail)
+      }
+    ]
   },
   {
     path: 'cart',
@@ -70,7 +79,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [authGuard, adminGuard],
-    loadComponent: () => import('./features/admin/admin').then((c) => c.Admin),
+    loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
   },
   {
     path: '**',

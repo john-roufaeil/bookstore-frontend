@@ -1,0 +1,11 @@
+.admin-search {
+  width: min(380px, 70vw);
+}
+
+table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6c757d;
+}
+

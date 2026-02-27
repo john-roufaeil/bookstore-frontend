@@ -42,10 +42,16 @@ export class Login implements OnInit {
     this.loginForm.disable();
 
     this.authService.loginForm(formData).subscribe({
-      next: () => {
+      next: (res) => {
         this.isLoading.set(false);
         this.cartService.refreshCart();
-        this.router.navigate(['/']);
+        const payload = JSON.parse(atob(res.data.token.split('.')[1]));
+        const isAdmin = payload.role === 'admin';
+        if (isAdmin) {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/']);
+        }
       },
       error: (err) => {
         this.serverError.set(err.error?.message || 'Login failed. Please try again.');

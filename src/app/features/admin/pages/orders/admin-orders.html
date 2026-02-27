@@ -1,0 +1,125 @@
+<section class="container">
+  <app-admin-toolbar title="Orders" subtitle="Manage orders." (refresh)="fetchOrders()" [showSearch]="false">
+
+    <select class="form-select form-select-sm border-book" style="width: 190px;" [ngModel]="statusFilter"
+      (ngModelChange)="statusFilter = $event; onFilterChange()">
+      <option value="">All statuses</option>
+      <option value="processing">Processing</option>
+      <option value="out_for_delivery">Out for delivery</option>
+      <option value="delivered">Delivered</option>
+    </select>
+
+    <select class="form-select form-select-sm border-book" style="width: 170px;" [ngModel]="paymentFilter"
+      (ngModelChange)="paymentFilter = $event; onFilterChange()">
+      <option value="">All payments</option>
+      <option value="pending">Pending</option>
+      <option value="success">Success</option>
+    </select>
+
+    <select class="form-select form-select-sm border-book" style="width: 190px;" [ngModel]="sort"
+      (ngModelChange)="onSortChange($event)">
+      <option value="createdAt:desc">Newest</option>
+      <option value="createdAt:asc">Oldest</option>
+      <option value="total:desc">Total: high to low</option>
+      <option value="total:asc">Total: low to high</option>
+    </select>
+  </app-admin-toolbar>
+
+  @if (pageErrorMessage()) {
+  <div class="alert alert-danger border-0 shadow-sm">{{ pageErrorMessage() }}</div>
+  }
+
+  <app-admin-table [columns]="columns" [rows]="pagedOrders" [loading]="loading()" emptyIcon="bi bi-bag-x"
+    emptyText="No orders found." [currentPage]="page" [totalPages]="totalPages" (pageChange)="onPageChange($event)">
+    <ng-template let-order>
+      <tr>
+        <td class="font-mono text-muted">#{{ (order._id || '').slice(-6) }}</td>
+        <td class="text-brown fw-semibold">
+          {{`${order.userId?.firstName ?? ''} ${order.userId?.lastName ?? ''}`.trim()
+          }}
+        </td>
+        <td>{{ (order.items || []).length }}</td>
+        <td>${{ orderTotal(order) | number:'1.2-2' }}</td>
+        <td>{{ formatStatus(order.status) }}</td>
+        <td>
+          <span class="badge rounded-pill" [class.text-bg-warning]="order.paymentStatus === 'pending'"
+            [class.text-bg-success]="order.paymentStatus === 'success'">
+            {{ formatPayment(order.paymentStatus) }}
+          </span>
+        </td>
+        <td class="text-muted">{{ order.createdAt ? (order.createdAt | date:'medium') : '—' }}</td>
+        <td class="text-end">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-book-outline" (click)="openView(order)">View</button>
+            @if (getNextStatus(order.status)) {
+            <button type="button" class="btn btn-book-primary" [disabled]="saving()" (click)="openAdvance(order)">
+              @if (order.status === 'processing') {
+              <i class="bi bi-truck me-1" aria-hidden="true"></i>
+              Delivering
+              } @else {
+              <i class="bi bi-check2-circle me-1" aria-hidden="true"></i>
+              Delivered
+              }
+            </button>
+            }
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </app-admin-table>
+</section>
+
+<app-admin-modal [open]="viewOpen" title="Order details" (closed)="closeView()">
+  <div class="row g-3">
+    <div class="col-12 col-lg-6">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Order</div>
+      <div class="font-mono">#{{ selectedOrder?._id }}</div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Status</div>
+      <div>{{ formatStatus(selectedOrder?.status ?? '') }}</div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Payment</div>
+      <div>{{ formatPayment(selectedOrder?.paymentStatus ?? '') }}</div>
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Total</div>
+      <div>${{ selectedOrder ? (orderTotal(selectedOrder) | number:'1.2-2') : '—' }}</div>
+    </div>
+
+    <div class="col-12">
+      <div class="text-muted small text-uppercase tracking-widest fw-bold mb-2">Items</div>
+      <div class="table-responsive border rounded-3">
+        <table class="table table-sm mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Book</th>
+              <th style="width: 110px;">Qty</th>
+              <th style="width: 140px;">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of (selectedOrder?.items || []); track $index) {
+            <tr>
+              <td class="text-brown fw-semibold">{{ item.bookId?.name ?? '—' }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>${{ item.priceAtPurchase | number:'1.2-2' }}</td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="3" class="text-center text-muted py-3">No items.</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</app-admin-modal>
+
+<app-admin-confirm-modal [open]="advanceOpen()" title="Advance order status"
+  [message]="'Move order #' + ((selectedForAdvance()?._id || '').slice(-6)) + ' to ' + formatStatus(nextStatus() || '') + '? This cannot be undone.'"
+  [error]="modalErrorMessage()"
+  [confirmText]="saving() ? 'Saving...' : 'Confirm'" [confirmDisabled]="saving()" confirmClass="btn-book-primary"
+  (confirmed)="confirmAdvance()" (closed)="closeAdvance()"></app-admin-confirm-modal>

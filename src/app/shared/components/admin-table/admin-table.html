@@ -1,0 +1,42 @@
+<app-data-table
+  [currentPage]="currentPage()"
+  [totalPages]="totalPages()"
+  (pageChange)="pageChange.emit($event)"
+>
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light">
+      <tr>
+        @for (col of columns(); track $index) {
+          <th [style.width]="col.width" [class.text-end]="col.align === 'end'">{{ col.label }}</th>
+        }
+      </tr>
+    </thead>
+
+    <tbody>
+      @if (loading() && !rows().length) {
+        <tr>
+          <td [attr.colspan]="columns().length" class="text-center py-5">
+            <div class="spinner-border text-brown" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      } @else {
+        @for (row of rows(); track trackByValue($index, row)) {
+          <ng-container
+            [ngTemplateOutlet]="rowTemplate || null"
+            [ngTemplateOutletContext]="{ $implicit: row, index: $index }"
+          ></ng-container>
+        } @empty {
+          <tr>
+            <td [attr.colspan]="columns().length" class="text-center py-5 text-muted">
+              <i [class]="emptyIcon() + ' display-6 d-block mb-2 opacity-25'"></i>
+              {{ emptyText() }}
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</app-data-table>
+

@@ -20,6 +20,8 @@ export class BookService {
         author?: string;
         minPrice?: number;
         maxPrice?: number;
+        sortBy?: string;
+        sortOrder?: 'asc' | 'desc';
     }): Observable<any> {
         let httpParams = new HttpParams();
 
@@ -31,6 +33,8 @@ export class BookService {
             if (params.author) httpParams = httpParams.set('author', params.author);
             if (params.minPrice) httpParams = httpParams.set('minPrice', params.minPrice.toString());
             if (params.maxPrice) httpParams = httpParams.set('maxPrice', params.maxPrice.toString());
+            if (params.sortBy) httpParams = httpParams.set('sortBy', params.sortBy);
+            if (params.sortOrder) httpParams = httpParams.set('sortOrder', params.sortOrder);
         }
 
         return this.http.get<any>(this.apiUrl, { params: httpParams }).pipe(
@@ -40,6 +44,24 @@ export class BookService {
 
     getBook(id: string): Observable<any> {
         return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+            map(res => res.data)
+        );
+    }
+
+    createBook(payload: any): Observable<any> {
+        return this.http.post<any>(this.apiUrl, payload).pipe(
+            map(res => res.data)
+        );
+    }
+
+    updateBook(id: string, payload: any): Observable<any> {
+        return this.http.patch<any>(`${this.apiUrl}/${id}`, payload).pipe(
+            map(res => res.data)
+        );
+    }
+
+    deleteBook(id: string): Observable<any> {
+        return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
             map(res => res.data)
         );
     }

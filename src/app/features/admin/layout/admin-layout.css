@@ -1,0 +1,45 @@
+.admin-shell {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+.admin-sidebar {
+  width: 260px;
+  flex: 0 0 260px;
+}
+
+.admin-nav-link {
+  color: var(--bs-gray-700);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  font-weight: 600;
+}
+
+.admin-nav-link:hover {
+  background: rgba(111, 66, 193, 0.08);
+  color: var(--book-primary, #6f42c1);
+}
+
+.admin-nav-link.active {
+  background: rgba(111, 66, 193, 0.12);
+  color: #b8860b;
+}
+
+.admin-main {
+  background: var(--book-bg);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 991.98px) {
+  .admin-shell {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    flex: 0 0 auto;
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
