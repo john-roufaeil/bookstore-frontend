@@ -1,0 +1,11 @@
+<app-admin-modal [open]="open" [title]="title" (closed)="closed.emit()">
+  <ng-content></ng-content>
+
+  <div footer>
+    <button type="button" class="btn btn-book-outline" (click)="closed.emit()">Cancel</button>
+    <button type="button" class="btn btn-book-primary" [disabled]="submitDisabled" (click)="submitted.emit()">
+      {{ submitText }}
+    </button>
+  </div>
+</app-admin-modal>
+

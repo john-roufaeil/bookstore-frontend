@@ -1,0 +1,11 @@
+<app-admin-modal [open]="open" [title]="title" (closed)="closed.emit()">
+  <p class="mb-0">{{ message }}</p>
+
+  <div footer>
+    <button type="button" class="btn btn-book-outline" (click)="closed.emit()">Cancel</button>
+    <button type="button" class="btn btn-danger" [disabled]="confirmDisabled" (click)="confirmed.emit()">
+      {{ confirmText }}
+    </button>
+  </div>
+</app-admin-modal>
+

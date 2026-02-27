@@ -1,0 +1,30 @@
+<div class="d-flex flex-wrap gap-3 align-items-center justify-content-between mb-4">
+  <div>
+    <h1 class="font-serif fw-black text-brown mb-1">{{ title }}</h1>
+    @if (subtitle) {
+    <p class="text-muted small mb-0">{{ subtitle }}</p>
+    }
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+    @if (showSearch) {
+    <div class="input-group input-group-sm admin-search">
+      <span class="input-group-text bg-white border-book text-muted">
+        <i class="bi bi-search" aria-hidden="true"></i>
+      </span>
+      <input type="search" class="form-control border-book" [placeholder]="searchPlaceholder" [ngModel]="search"
+        (ngModelChange)="onSearchChange($event)" />
+      @if (search) {
+      <button type="button" class="btn btn-book-outline" (click)="clearSearch()">Clear</button>
+      }
+    </div>
+    }
+
+    <ng-content></ng-content>
+
+    <button type="button" class="btn btn-book-outline btn-sm" (click)="refresh.emit()">
+      <i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>
+      Refresh
+    </button>
+  </div>
+</div>
