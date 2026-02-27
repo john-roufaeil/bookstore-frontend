@@ -290,3 +290,36 @@ body.dark .shadow-sm {
     padding: 8px 16px;
   }
 }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--book-border) 25%, var(--book-surface) 50%, var(--book-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: 10px;
+}
+
+.skeleton-title {
+  height: 22px;
+  width: 60%;
+  margin-bottom: 12px;
+}
+
+.skeleton-img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.skeleton-btn {
+  height: 42px;
+  border-radius: 20px;
+}
