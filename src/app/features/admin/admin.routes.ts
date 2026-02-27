@@ -24,10 +24,6 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./pages/reviews/admin-reviews').then((c) => c.AdminReviews),
       },
       {
-        path: 'users',
-        loadComponent: () => import('./pages/users/admin-users').then((c) => c.AdminUsers),
-      },
-      {
         path: 'authors',
         loadComponent: () => import('./pages/authors/admin-authors').then((c) => c.AdminAuthors),
       },

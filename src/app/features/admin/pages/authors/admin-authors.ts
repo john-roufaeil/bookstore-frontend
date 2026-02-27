@@ -26,6 +26,7 @@ type SortType =
 })
 export class AdminAuthors implements OnInit {
   loading = signal(true);
+  saving = signal(false);
   errorMessage = signal('');
 
   search = '';
@@ -102,8 +103,8 @@ export class AdminAuthors implements OnInit {
 
       items.sort((a, b) => {
         if (sortBy === 'bookCount') {
-          const a1 = Number(a?.bookCount) || 0;
-          const b1 = Number(b?.bookCount) || 0;
+          const a1 = Number(a?.bookCount ?? 0);
+          const b1 = Number(b?.bookCount ?? 0);
           return (a1 - b1) * dir;
         }
         if (sortBy === 'createdAt') {
@@ -148,21 +149,29 @@ export class AdminAuthors implements OnInit {
     const trimmedName = name.trim();
     if (!trimmedName) return;
 
-    const id = this.editingId();
-    if (id) {
-      const updated = this.authors().map((a) =>
-        a?._id === id ? { ...a, name: trimmedName, bio } : a
-      );
-      this.authors.set(updated);
-    } else {
-      const newAuthor = {
-        name: trimmedName,
-        bio
-      };
-      this.authors.set([newAuthor, ...this.authors()]);
-    }
+    this.saving.set(true);
+    this.errorMessage.set('');
 
-    this.formOpen.set(false);
+    const id = this.editingId();
+    const body = { name: trimmedName, bio: bio?.trim() };
+    const req = id
+      ? this.http.patch<any>(`${environment.apiUrl}/authors/${id}`, body)
+      : this.http.post<any>(`${environment.apiUrl}/authors`, body);
+
+    req
+      .pipe(
+        timeout(15000),
+        finalize(() => this.saving.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.formOpen.set(false);
+          this.fetchAuthors();
+        },
+        error: () => {
+          this.errorMessage.set(id ? 'Failed to update author.' : 'Failed to create author.');
+        },
+      });
   }
 
   selectedForDelete = signal<Author | null>(null);
@@ -180,7 +189,23 @@ export class AdminAuthors implements OnInit {
   confirmDelete(): void {
     const selected = this.selectedForDelete();
     if (!selected?._id) return;
-    this.authors.set(this.authors().filter((a) => a?._id !== selected._id));
-    this.closeDelete();
+
+    this.saving.set(true);
+    this.errorMessage.set('');
+
+    this.http
+      .delete<any>(`${environment.apiUrl}/authors/${selected?._id}`)
+      .pipe(
+        finalize(() => this.saving.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.closeDelete();
+          this.fetchAuthors();
+        },
+        error: () => {
+          this.errorMessage.set('Failed to delete author.');
+        },
+      });
   }
 }

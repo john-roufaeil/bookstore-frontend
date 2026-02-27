@@ -39,7 +39,7 @@
 </section>
 
 <app-admin-form-modal [open]="formOpen()" [title]="editingId() ? 'Edit Author' : 'Create Author'" submitText="Save"
-  [submitDisabled]="!draft().name.trim()" (submitted)="saveDraft()" (closed)="closeForm()">
+  [submitDisabled]="saving() || !draft().name.trim()" (submitted)="saveDraft()" (closed)="closeForm()">
   <div class="row g-3">
     <div class="col-12 col-lg-6">
       <label class="form-label small text-uppercase tracking-widest fw-bold text-muted">Name</label>
@@ -55,6 +55,6 @@
 </app-admin-form-modal>
 
 <app-admin-confirm-modal [open]="deleteOpen()" title="Delete author"
-  [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'" confirmText="Delete" (confirmed)="confirmDelete()"
-  (closed)="closeDelete()">
+  [message]="'Delete ' + (selectedForDelete()?.name || '') + '?'" confirmText="Delete" [confirmDisabled]="saving()"
+  (confirmed)="confirmDelete()" (closed)="closeDelete()">
 </app-admin-confirm-modal>
