@@ -29,7 +29,7 @@
               <div class="d-flex flex-wrap align-items-center w-100 gap-3">
                 <div class="me-auto text-start">
                   <div class="fw-bold text-brown mb-1">
-                    Order #{{ order._id | slice: -8 | uppercase }}
+                    Order #{{ order._id | slice: -6 | uppercase }}
                   </div>
                   <div class="small text-muted">
                     Placed on {{ order.createdAt | date: 'mediumDate' }}
