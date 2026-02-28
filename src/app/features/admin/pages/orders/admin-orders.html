@@ -106,7 +106,7 @@
   <div class="row g-3">
     <div class="col-12 col-lg-6">
       <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Order</div>
-      <div class="font-mono">#{{ (selectedOrder?._id || '').slice(-6) }}</div>
+      <div class="font-mono">#{{ selectedOrder?._id }}</div>
     </div>
     <div class="col-12 col-lg-6">
       <div class="text-muted small text-uppercase tracking-widest fw-bold mb-1">Status</div>
@@ -135,7 +135,7 @@
           <tbody>
             @for (item of selectedOrder?.items || []; track $index) {
               <tr>
-                <td class="text-brown fw-semibold">{{ item.bookId?.name ?? '—' }}</td>
+                <td class="text-brown fw-semibold">{{ item.bookId.name }}</td>
                 <td>{{ item.quantity }}</td>
                 <td>${{ item.priceAtPurchase | number: '1.2-2' }}</td>
               </tr>

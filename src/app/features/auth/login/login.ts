@@ -54,7 +54,10 @@ export class Login implements OnInit {
         }
       },
       error: (err) => {
-        this.serverError.set(err.error?.message || 'Login failed. Please try again.');
+        const msg = err.status === 0
+          ? 'Cannot connect to the server. Please check your internet connection.'
+          : (err.error?.message || 'Login failed. Please try again.');
+        this.serverError.set(msg);
         this.isLoading.set(false);
         this.loginForm.enable();
       },

@@ -94,7 +94,10 @@ export class Register implements OnInit {
         this.router.navigate(['/auth/login']);
       },
       error: (err) => {
-        this.serverError.set(err.error?.message || 'Registration failed. Please try again.');
+        const msg = err.status === 0
+          ? 'Cannot connect to the server. Please check your internet connection.'
+          : (err.error?.message || 'Registration failed. Please try again.');
+        this.serverError.set(msg);
         this.isLoading.set(false);
         this.registerForm.enable();
       },

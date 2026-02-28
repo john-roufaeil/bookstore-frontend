@@ -92,7 +92,10 @@ export class Profile implements OnInit {
         this.successMessage.set('Profile updated successfully!');
       },
       error: (err) => {
-        this.serverError.set(err.error?.message || 'Failed to update profile.');
+        const msg = err.status === 0
+          ? 'Cannot connect to the server. Please check your internet connection.'
+          : (err.error?.message || 'Failed to update profile.');
+        this.serverError.set(msg);
         this.isLoading.set(false);
       },
     });

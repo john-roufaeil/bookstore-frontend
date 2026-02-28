@@ -1,0 +1,41 @@
+.hover-lift {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.card-img-top {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.hover-lift:hover .card-img-top {
+  transform: scale(1.08);
+}
+
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.hover-scale:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+/* Ensure overlay elements don't jitter */
+.badge {
+  z-index: 2;
+}
+
+.card-body {
+  z-index: 1;
+  background: white;
+}
