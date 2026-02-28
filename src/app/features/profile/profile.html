@@ -27,23 +27,16 @@
               <span class="stat-value">{{ user.stats.reviews }}</span>
               <span class="stat-label">Reviews</span>
             </div>
-            <div class="stat-item flex-grow-1">
-              <span class="stat-value">{{ user.stats.wishlist }}</span>
-              <span class="stat-label">Wishlist</span>
-            </div>
           </div>
 
           <div class="profile-nav d-grid gap-2 text-start">
-            <a href="javascript:void(0)" class="nav-link active">
+            <a routerLink="/profile" routerLinkActive="active" class="nav-link">
               <i class="fa-solid fa-user me-2"></i>Personal Info
             </a>
-            <a href="javascript:void(0)" class="nav-link">
+            <a routerLink="/orders" routerLinkActive="active" class="nav-link">
               <i class="fa-solid fa-box-archive me-2"></i>My Orders
             </a>
-            <a href="javascript:void(0)" class="nav-link">
-              <i class="fa-solid fa-heart me-2"></i>Whishlist
-            </a>
-            <a href="javascript:void(0)" class="nav-link text-danger">
+            <a href="javascript:void(0)" (click)="logout()" class="nav-link text-danger">
               <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
             </a>
           </div>

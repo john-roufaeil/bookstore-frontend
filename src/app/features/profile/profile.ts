@@ -1,10 +1,11 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../auth/auth.service/auth-service';
 
 @Component({
   selector: 'app-profile',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink, RouterLinkActive],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -31,7 +32,6 @@ export class Profile implements OnInit {
   serverError = signal('');
 
   ngOnInit(): void {
-    // Decode the JWT — no API call
     const decoded = this.authService.getCurrentUser();
 
     if (decoded) {
@@ -96,5 +96,9 @@ export class Profile implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  logout() {
+    this.authService.logOut();
   }
 }
