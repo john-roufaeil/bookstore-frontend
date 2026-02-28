@@ -28,7 +28,9 @@
             >
               <div class="d-flex flex-wrap align-items-center w-100 gap-3">
                 <div class="me-auto text-start">
-                  <div class="fw-bold text-brown mb-1">{{ order._id }}</div>
+                  <div class="fw-bold text-brown mb-1">
+                    Order #{{ order._id | slice: -8 | uppercase }}
+                  </div>
                   <div class="small text-muted">
                     Placed on {{ order.createdAt | date: 'mediumDate' }}
                   </div>
@@ -63,7 +65,6 @@
           >
             <div class="accordion-body bg-light bg-opacity-25 px-4 py-4">
               <div class="row g-4">
-                <!-- Order Items -->
                 <div class="col-lg-8">
                   <h6 class="fw-bold mb-3 small text-uppercase text-muted">Items Ordered</h6>
                   <div class="card border-0 shadow-none bg-transparent">
@@ -89,7 +90,6 @@
                   </div>
                 </div>
 
-                <!-- Shipping Address -->
                 <div class="col-lg-4">
                   <div class="p-3 bg-white rounded-3 border h-100 shadow-sm">
                     <h6 class="fw-bold mb-2 small text-uppercase text-muted">Shipping Address</h6>
