@@ -14,15 +14,21 @@
 
 ## 📖 Table of Contents
 
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started-locally)
-- [Project Structure](#-project-structure)
-- [Pages & Routes](#-pages--routes)
-- [How It Works](#-how-it-works)
-- [Dark Mode](#-dark-mode)
-- [Environment Configuration](#-environment-configuration)
-- [Team](#-team)
-- [Scripts](#-scripts)
+- [📚 Bookstore Frontend](#-bookstore-frontend)
+  - [📖 Table of Contents](#-table-of-contents)
+  - [🛠 Tech Stack](#-tech-stack)
+  - [🚀 Getting Started Locally](#-getting-started-locally)
+  - [📁 Project Structure](#-project-structure)
+  - [🗺 Pages \& Routes](#-pages--routes)
+  - [⚙️ How It Works](#️-how-it-works)
+    - [Authentication](#authentication)
+    - [Interceptors](#interceptors)
+    - [Cart](#cart)
+    - [Admin Panel](#admin-panel)
+  - [🌙 Dark Mode](#-dark-mode)
+  - [🌍 Environment Configuration](#-environment-configuration)
+  - [👥 Team](#-team)
+  - [📜 Scripts](#-scripts)
 
 ---
 
@@ -174,10 +180,10 @@ This project was built by a team of 4 as part of our ITI training program.
 
 | Member | Responsibilities |
 |--------|-----------------|
-| **Person 1** | Core infrastructure, AuthService, guards, interceptors, all TypeScript models, Login, Register, Profile pages, frontend deployment |
-| **Person 2** | BookService, Home page, Book List with filters, Book Detail, BookCard component, StarRating component |
-| **Person 3** | CartService, Navbar, Cart page, Checkout, Order History |
-| **Person 4** | AdminService, all Admin panel tables, Review component |
+| **Mohamed Khaled** | Core infrastructure, AuthService, guards, interceptors, all TypeScript models, Login, Register, Profile pages, frontend deployment |
+| **Rana Mohamed** | BookService, Home page, Book List with filters, Book Detail, BookCard component, StarRating component |
+| **Salma Yasser** | CartService, Navbar, Cart page, Checkout, Order History |
+| **John Roufail** | AdminService, all Admin panel tables, Review component |
 
 ---
 
