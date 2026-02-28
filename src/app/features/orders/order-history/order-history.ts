@@ -1,13 +1,20 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CurrencyPipe, DatePipe, TitleCasePipe, NgClass } from '@angular/common';
+import {
+  CurrencyPipe,
+  DatePipe,
+  TitleCasePipe,
+  NgClass,
+  SlicePipe,
+  UpperCasePipe,
+} from '@angular/common';
 import { Order } from '../../../core/models/order.model';
 import { OrderService } from '../../../core/services/order.service';
 
 @Component({
   selector: 'app-order-history',
   standalone: true,
-  imports: [RouterLink, CurrencyPipe, DatePipe, TitleCasePipe, NgClass],
+  imports: [RouterLink, CurrencyPipe, DatePipe, TitleCasePipe, NgClass, SlicePipe, UpperCasePipe],
   templateUrl: './order-history.html',
   styleUrl: './order-history.css',
 })
