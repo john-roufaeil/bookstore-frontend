@@ -60,7 +60,17 @@
                 "
                 placeholder="+20 123 4567 890"
               />
-              <div class="invalid-feedback">Please enter a valid phone number.</div>
+              @if (shippingForm.get('phone')?.invalid && shippingForm.get('phone')?.touched) {
+                @if (shippingForm.get('phone')?.errors?.['required']) {
+                  <div class="text-danger small mt-1">
+                    <i class="fa-solid fa-circle-exclamation me-1"></i>Phone number is required.
+                  </div>
+                } @else {
+                  <div class="text-danger small mt-1">
+                    <i class="fa-solid fa-circle-exclamation me-1"></i>Phone number is not valid.
+                  </div>
+                }
+              }
             </div>
           </div>
 

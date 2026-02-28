@@ -30,7 +30,7 @@ export class Checkout {
       fullName: ['', [Validators.required, Validators.minLength(3)]],
       address: ['', [Validators.required, Validators.minLength(10)]],
       city: ['', [Validators.required]],
-      phone: ['', [Validators.required, Validators.pattern('^[0-9+]{8,15}$')]],
+      phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9]{11,15}$/)]],
     });
   }
 
