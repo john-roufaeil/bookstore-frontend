@@ -21,7 +21,7 @@ export class BookList implements OnInit {
   loading = signal(true);
   currentPage = signal(1);
   totalPages = signal(1);
-  limit = signal(8);
+  limit = signal(9);
 
   currentFilters = signal<FilterState>({
     search: '',
@@ -40,7 +40,7 @@ export class BookList implements OnInit {
     private categoryService: CategoryService,
     private authorService: AuthorService,
     private cartService: CartService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadFilters();
@@ -73,7 +73,7 @@ export class BookList implements OnInit {
     this.bookService.getBooks(params).subscribe({
       next: (data) => {
         this.books.set(data.books || []);
-        this.totalPages.set(data.totalPages || 1);
+        this.totalPages.set(data.pagination?.totalPages || 1);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
